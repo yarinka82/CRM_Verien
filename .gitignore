@@ -45,13 +45,7 @@ venv/
 env/
 ENV/
 
-# 🔥 ТОЛЬКО models.py и миграции (локальные данные)
-backend/apps/members/models.py
-backend/apps/members/migrations/
 
-# Но оставляем структуру папок
-!backend/apps/members/__init__.py
-!backend/apps/members/migrations/__init__.py
 
 # Node.js
 frontend/node_modules/
