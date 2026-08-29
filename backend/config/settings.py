@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     
     # third-party
     'rest_framework',
+    'django_filters',
     'corsheaders',
     
     # local
@@ -41,6 +42,28 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+
+CORS_ALLOWED_ORIGINS = ['http://localhost:5173']
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+# Для удобства разработки (НЕ ДЛЯ ПРОДАКШЕНА!)
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_HTTPONLY = False
 
 ROOT_URLCONF = 'config.urls'
 
@@ -77,18 +100,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-]
-# Для удобства разработки (НЕ ДЛЯ ПРОДАКШЕНА!)
-CSRF_COOKIE_HTTPONLY = False
-SESSION_COOKIE_HTTPONLY = False
 
-# Безопаснее для разработки
-CORS_ALLOW_ALL_ORIGINS = True  # Только для разработки!
-# Или для продакшена:
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-# ]
+
