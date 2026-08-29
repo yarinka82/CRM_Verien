@@ -31,6 +31,23 @@ class Member(models.Model):
         null=True, 
         verbose_name=_('Phone Number')
     )
+    
+    # Нові поля за запитом фронтенду 
+    birth_date = models.DateField(
+        verbose_name=_('Дата народження'),
+        null=True,
+        blank=True
+    )
+    address = models.CharField(
+        verbose_name=_('Адреса'),
+        max_length=255,
+        blank=True
+    )
+    notes = models.TextField(
+        verbose_name=_('Примітки'),
+        blank=True
+    )
+
     join_date = models.DateField(
         verbose_name=_('Join Date')
     )
