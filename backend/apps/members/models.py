@@ -7,10 +7,10 @@ class Member(models.Model):
     Модель учасника (Member) організації/клубу.
     Віповідає бізнес-вимогам MVP та закладає фундамент для аналітики й CRM.
     """
-    class Status(models.TextChoices):
-        ACTIVE = 'active', _('Active')
-        INACTIVE = 'inactive', _('Inactive')
-        PENDING = 'pending', _('Pending')
+    STATUS_CHOICES = [
+        ('active', 'Активний'),
+        ('inactive', 'Неактивний'),
+    ]
 
     first_name = models.CharField(
         max_length=100, 
@@ -21,14 +21,12 @@ class Member(models.Model):
         verbose_name=_('Last Name')
     )
     email = models.EmailField(
-        unique=True, 
-        db_index=True, 
+        unique=True,
         verbose_name=_('Email Address')
     )
     phone = models.CharField(
         max_length=30, 
-        blank=True, 
-        null=True, 
+        blank=True,
         verbose_name=_('Phone Number')
     )
     
@@ -51,13 +49,10 @@ class Member(models.Model):
     join_date = models.DateField(
         verbose_name=_('Join Date')
     )
-    status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        default=Status.ACTIVE,
-        db_index=True,
-        verbose_name=_('Member Status')
-    )
+    
+    status = models.CharField('Статус',
+        max_length=20, choices=STATUS_CHOICES, default='active')
+    
     is_founder = models.BooleanField(
         default=False, 
         verbose_name=_('Is Founder')
@@ -78,7 +73,8 @@ class Member(models.Model):
         verbose_name_plural = _('Members')
         ordering = ['-join_date', 'last_name', 'first_name']
         indexes = [
-            models.Index(fields=['status', 'join_date'], name='idx_member_status_join'),
+            models.Index(fields=['status', 'join_date'],
+                         name='idx_member_status_join'),
         ]
 
     def __str__(self):
