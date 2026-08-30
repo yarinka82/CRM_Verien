@@ -82,7 +82,7 @@ const PasswordField: React.FC<{
   );
 };
 
-const Settings: React.FC = () => {
+const Preferences: React.FC = () => {
   const { t } = useTranslation();
   const { isStaff } = useAuth();
 
@@ -379,4 +379,4 @@ const AddUserDialog: React.FC<{ open: boolean; onClose: () => void; onCreated: (
   );
 };
 
-export default Settings;
+export default Preferences;

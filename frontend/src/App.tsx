@@ -15,7 +15,7 @@ import MemberDetail from './pages/MemberDetail';
 import MemberForm from './pages/MemberForm';
 import Layout from '@/pages/components/Layout';
 import theme from "@/pages/components/theme.ts";
-import Settings from './pages/Settings';
+import Preferences from './pages/Preferences.tsx';
 
 function App() {
   return (
@@ -40,7 +40,7 @@ function App() {
                 <Route path="members/add" element={<MemberForm />} />
                 <Route path="members/:id" element={<MemberDetail />} />
                 <Route path="members/:id/edit" element={<MemberForm />} />
-                <Route path="settings" element={<Settings />} />
+                <Route path="settings" element={<Preferences />} />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />
