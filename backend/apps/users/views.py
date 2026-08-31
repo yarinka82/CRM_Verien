@@ -4,8 +4,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
-from .serializers import UserSerializer, UserCreateSerializer, ChangePasswordSerializer
+from .serializers import UserSerializer, UserCreateSerializer, UserUpdateSerializer, ChangePasswordSerializer
 
 User = get_user_model()
 
@@ -32,7 +33,7 @@ def login_view(request):
         )
 
     login(request, user)
-    return Response({'username': user.username, 'is_staff': user.is_staff})
+    return Response({'id': user.id, 'username': user.username, 'is_staff': user.is_staff})
 
 
 @api_view(['POST'])
@@ -52,8 +53,12 @@ def me_view(request):
     get_token(request)
 
     if not request.user.is_authenticated:
-        return Response({'username': None, 'is_staff': False})
-    return Response({'username': request.user.username, 'is_staff': request.user.is_staff})
+        return Response({'id': None, 'username': None, 'is_staff': False})
+    return Response({
+        'id': request.user.id,
+        'username': request.user.username,
+        'is_staff': request.user.is_staff,
+    })
 
 
 # ---- Self-service password change (any authenticated user) ----
@@ -77,8 +82,9 @@ def change_password_view(request):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    List, create, and deactivate users. Restricted to staff accounts —
-    an ordinary member should not be able to see or manage the user list.
+    List, create, update, and deactivate users. Restricted to staff
+    accounts — an ordinary member should not be able to see or manage
+    the user list.
     """
     queryset = User.objects.all().order_by('username')
     permission_classes = [IsAdminUser]
@@ -86,10 +92,26 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
+        if self.action in ('update', 'partial_update'):
+            return UserUpdateSerializer
         return UserSerializer
 
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        # Prevent an admin from demoting or deactivating their own account —
+        # otherwise a single click could lock everyone out of user management.
+        if instance.pk == self.request.user.pk:
+            new_is_staff = serializer.validated_data.get('is_staff', instance.is_staff)
+            new_is_active = serializer.validated_data.get('is_active', instance.is_active)
+            if not new_is_staff or not new_is_active:
+                raise ValidationError(
+                    "Ви не можете зняти з себе права адміністратора "
+                    "або деактивувати власний обліковий запис."
+                )
+        serializer.save()
+    
     def perform_destroy(self, instance):
-        # Soft-delete: deactivate instead of hard-deleting an account,
-        # so historical records (created_by, etc.) stay intact.
-        instance.is_active = False
-        instance.save()
+        # Prevent an admin from deleting their own account.
+        if instance.pk == self.request.user.pk:
+            raise ValidationError('Ви не можете видалити власний обліковий запис.')
+        instance.delete()

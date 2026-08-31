@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink } from 'react-router-dom';
+import dayjs from 'dayjs';
 import {
   Box,
   Typography,
@@ -10,6 +11,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  TableSortLabel,
   Chip,
   Button,
   ToggleButton,
@@ -19,11 +21,21 @@ import {
   CircularProgress,
   Paper,
   Tooltip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Alert,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import { tokens } from "@/pages/components/theme.ts";
+import DeleteOutlineIcon from '@mui/icons-material/Delete';
+
+import {apiFetch} from "@/api/client.ts";
+import {tokens} from "@/pages/Members/components/theme.ts";
 
 interface Member {
   id: number;
@@ -37,6 +49,13 @@ interface Member {
 }
 
 type FounderFilter = 'all' | 'founders';
+type StatusFilter = 'all' | 'active' | 'inactive';
+
+// API always sends ISO (YYYY-MM-DD) — this only affects what's shown on screen.
+const formatDate = (isoDate: string) => {
+  const d = dayjs(isoDate);
+  return d.isValid() ? d.format('DD.MM.YYYY') : isoDate;
+};
 
 const MemberList: React.FC = () => {
   const { t } = useTranslation();
@@ -44,33 +63,35 @@ const MemberList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [founderFilter, setFounderFilter] = useState<FounderFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    let cancelled = false;
+  const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const loadMembers = () => {
     setLoading(true);
+    setError(null);
     fetch('/api/members/')
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-      .then((data: Member[]) => {
-        if (!cancelled) setMembers(data);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err.message);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .then((data: Member[]) => setMembers(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadMembers();
   }, []);
 
   const filtered = useMemo(() => {
     return members
       .filter((m) => (founderFilter === 'founders' ? m.is_founder : true))
+      .filter((m) => (statusFilter === 'all' ? true : m.status === statusFilter))
       .filter((m) => {
         if (!query.trim()) return true;
         const q = query.toLowerCase();
@@ -79,8 +100,32 @@ const MemberList: React.FC = () => {
           m.last_name.toLowerCase().includes(q) ||
           m.email.toLowerCase().includes(q)
         );
+      })
+      .sort((a, b) => {
+        const diff = dayjs(a.join_date).valueOf() - dayjs(b.join_date).valueOf();
+        return sortOrder === 'asc' ? diff : -diff;
       });
-  }, [members, founderFilter, query]);
+  }, [members, founderFilter, statusFilter, query, sortOrder]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await apiFetch(`/api/members/${deleteTarget.id}/`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      setMembers((prev) => prev.filter((m) => m.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : t('members.deleteError')
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', px: { xs: 2, md: 4 }, py: 4 }}>
@@ -130,13 +175,13 @@ const MemberList: React.FC = () => {
       </Typography>
 
       {/* Controls */}
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
         <TextField
           size="small"
           placeholder={t('members.searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          sx={{ minWidth: 260, bgcolor: tokens.paperElevated }}
+          sx={{ minWidth: 400, bgcolor: tokens.paperElevated }}
           slotProps={{
             input: {
               startAdornment: (
@@ -147,6 +192,7 @@ const MemberList: React.FC = () => {
             },
           }}
         />
+
         <ToggleButtonGroup
           value={founderFilter}
           exclusive
@@ -163,6 +209,25 @@ const MemberList: React.FC = () => {
         >
           <ToggleButton value="all">{t('members.all')}</ToggleButton>
           <ToggleButton value="founders">{t('members.founders')}</ToggleButton>
+        </ToggleButtonGroup>
+
+        <ToggleButtonGroup
+          value={statusFilter}
+          exclusive
+          size="small"
+          onChange={(_, val) => val && setStatusFilter(val)}
+          sx={{
+            bgcolor: tokens.paperElevated,
+            '& .MuiToggleButton-root.Mui-selected': {
+              bgcolor: tokens.registry,
+              color: '#fff',
+              '&:hover': { bgcolor: tokens.registryDark },
+            },
+          }}
+        >
+          <ToggleButton value="all">{t('members.all')}</ToggleButton>
+          <ToggleButton value="active">{t('members.statusActive')}</ToggleButton>
+          <ToggleButton value="inactive">{t('members.statusInactive')}</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
@@ -200,8 +265,17 @@ const MemberList: React.FC = () => {
                 <TableCell>{t('members.fullName')}</TableCell>
                 <TableCell>{t('members.email')}</TableCell>
                 <TableCell>{t('members.phone')}</TableCell>
-                <TableCell>{t('members.joinedDate')}</TableCell>
+                <TableCell sortDirection={sortOrder}>
+                  <TableSortLabel
+                    active
+                    direction={sortOrder}
+                    onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                  >
+                    {t('members.joinedDate')}
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>{t('members.status')}</TableCell>
+                <TableCell align="right" />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -236,7 +310,7 @@ const MemberList: React.FC = () => {
                     {m.phone || '—'}
                   </TableCell>
                   <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '0.85rem' }}>
-                    {m.join_date}
+                    {formatDate(m.join_date)}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -251,12 +325,55 @@ const MemberList: React.FC = () => {
                       }}
                     />
                   </TableCell>
+                  <TableCell align="right">
+                    <Tooltip title={t('members.delete')}>
+                      <IconButton
+                        size="small"
+                        sx={{ color: tokens.muted, '&:hover': { color: tokens.danger } }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteError(null);
+                          setDeleteTarget(m);
+                        }}
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
       </Paper>
+
+      {/* Delete confirmation */}
+      <Dialog open={Boolean(deleteTarget)} onClose={() => !deleting && setDeleteTarget(null)}>
+        <DialogTitle sx={{ color: tokens.ink }}>{t('members.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          {deleteError && <Alert severity="error" sx={{ mb: 2 }}>{deleteError}</Alert>}
+          <DialogContentText>
+            {deleteTarget &&
+              t('members.deleteConfirmText', {
+                name: `${deleteTarget.last_name} ${deleteTarget.first_name}`,
+              })}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteTarget(null)} disabled={deleting}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            onClick={handleDelete}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+          >
+            {deleting ? t('common.deleting') : t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

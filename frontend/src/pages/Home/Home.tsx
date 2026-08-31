@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography, Button, Paper } from '@mui/material';
 import GroupsIcon from '@mui/icons-material/Groups';
-import { useAuth } from './AuthContext';
-import { tokens } from "@/pages/components/theme.ts";
+import {useAuth} from "@/hooks";
+import {tokens} from "@/pages/Members/components/theme.ts";
+
 
 const Home: React.FC = () => {
   const { t } = useTranslation();

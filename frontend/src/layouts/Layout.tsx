@@ -4,10 +4,11 @@ import { Box, AppBar, Toolbar, Typography, Button } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Outlet } from 'react-router-dom';
 
-import LanguageSwitcher from './LanguageSwitcher';
 import Sidebar from '@/components/Sidebar.tsx';
-import { useAuth } from '@/AuthContext';
-import {tokens} from "@/pages/components/theme.ts";
+import {tokens} from "@/pages/Members/components/theme.ts";
+import LanguageSwitcher from "@/components/LanguageSwitcher.tsx";
+import {useAuth} from "@/hooks";
+
 
 
 const Layout: React.FC = () => {
