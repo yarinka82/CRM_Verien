@@ -28,13 +28,14 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/uk';
+import membersApi from "@/api/members.ts";
+import {Member} from "@/types/members.ts";
 
 dayjs.extend(relativeTime);
 
 dayjs.locale('uk');
 
-import { membersApi } from '../api/members';
-import { Member } from '../types/members';
+
 
 const MemberDetail = () => {
   const { t } = useTranslation();

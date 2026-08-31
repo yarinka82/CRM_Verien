@@ -1,4 +1,4 @@
-import './axiosConfig';
+
 import React from 'react';
 import './i18n/index';
 import ReactDOM from 'react-dom/client';

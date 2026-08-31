@@ -17,10 +17,11 @@ import {
   Stack,
 } from '@mui/material';
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { useMembers } from '../hooks/useMembers';
-import { membersApi } from '../api/members';
-import { MemberFormData } from '../types/members';
+
 import dayjs from 'dayjs';
+import {useMembers} from "@/hooks";
+import {MemberFormData} from "@/types/members.ts";
+import membersApi from "@/api/members.ts";
 
 const MemberForm = () => {
   const { t } = useTranslation();
