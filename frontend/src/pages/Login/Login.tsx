@@ -69,11 +69,18 @@ const Login: React.FC = () => {
 
   return (
 
-    <Box sx={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
-            {/* Переключатель языка — в правом верхнем углу поверх всего */}
-      <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
-        <LanguageSwitcher />
+    <Box sx={{ display: 'flex', minHeight: '100vh', position: 'relative', flexDirection: 'column' }}>
+      {/* Прапорна смужка */}
+      <Box sx={{ display: 'flex', height: 6, flexShrink: 0 }}>
+        <Box sx={{ flex: 1, bgcolor: tokens.registry }} />
+        <Box sx={{ flex: 1, bgcolor: tokens.sealGold }} />
       </Box>
+
+      <Box sx={{ display: 'flex', flex: 1 }}>
+        {/* Переключатель языка */}
+        <Box sx={{ position: 'absolute', top: 22, right: 16, zIndex: 1 }}>
+          <LanguageSwitcher />
+        </Box>
 
 
       {/* Left — illustration panel, hidden on narrow screens */}
@@ -183,6 +190,7 @@ const Login: React.FC = () => {
           </Box>
         </Box>
       </Box>
+    </Box>
     </Box>
   );
 };
