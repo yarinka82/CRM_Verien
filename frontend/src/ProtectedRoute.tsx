@@ -2,8 +2,9 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
-import { useAuth } from './AuthContext';
-import {tokens} from "@/pages/components/theme.ts";
+import {tokens} from "@/pages/Members/components/theme.ts";
+import {useAuth} from "@/hooks";
+
 
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {

@@ -2,80 +2,86 @@ from django.db import models
 from apps.members.models import Member
 from django.utils.translation import gettext_lazy as _
 
+
 class Payment(models.Model):
     """
-    Модель платежів (Payment) для обліку внесків та фінансової аналітики.
+    Модель платежів (Payment) для обліку надходжень.
+    Відповідає структурі, визначеній у ТЗ (Частина В).
     """
     
     class PaymentType(models.TextChoices):
-        MEMBERSHIP_FEE = 'membership_fee', _('Membership Fee')
-        DONATION = 'donation', _('Donation')
-        EVENT = 'event', _('Event')
+        """
+        Джерела надходжень — система має бути готова обліковувати всі
+        чотири з самого початку, навіть якщо зараз активний лише
+        membership_fee.
+        """
+        MEMBERSHIP_FEE = 'membership_fee', _('Членський внесок')  # Mitgliedsbeiträge
+        DONATION = 'donation', _('Пожертва')  # Spenden
+        SPONSORSHIP = 'sponsorship', _('Спонсорська підтримка')  # Sponsoring
+        GRANT = 'grant', _('Грант')  # Fördergelder
     
     class PaymentStatus(models.TextChoices):
-        COMPLETED = 'completed', _('Completed')
-        PENDING = 'pending', _('Pending')
-        FAILED = 'failed', _('Failed')
-        REFUNDED = 'refunded', _('Refunded')
+        """Як у ТЗ: двостановий статус, а не стан платіжного шлюзу."""
+        PAID = 'paid', _('Оплачено')
+        OWED = 'owed', _('Заборговано')
     
     member = models.ForeignKey(
         Member,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,  # preserve payment history if a member is deleted
         related_name='payments',
-        verbose_name=_('Member')
+        null=True,
+        blank=True,  # empty when this is a donation/sponsorship/grant,
+        verbose_name=_('Член'),  # not tied to a specific member
     )
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        verbose_name=_('Amount')
+        verbose_name=_('Сума'),
     )
     date = models.DateField(
         db_index=True,
-        null=True,
-        blank=True,
-        verbose_name=_('Payment Date')
+        verbose_name=_('Дата'),
     )
-    
     type = models.CharField(
         max_length=50,
+        choices=PaymentType.choices,
         db_index=True,
-        null=True,
-        blank=True,
-        verbose_name=_('Payment Type')
+        verbose_name=_('Тип надходження'),
     )
     source_name = models.CharField(
         max_length=100,
         blank=True,
-        null=True,
-        verbose_name=_('Source Name')  # Наприклад: Bank Transfer, Stripe, PayPal
+        # For donations/sponsorship/grants: the sponsor's or fund's name.
+        # Null/blank for regular membership fees.
+        verbose_name=_('Назва джерела'),
     )
     period = models.CharField(
         max_length=50,
         blank=True,
-        null=True,
-        verbose_name=_('Billing Period')  # Наприклад: 2026, 2026-Q1
+        # e.g. "2026", "2026-Q1" — the billing period a membership fee covers
+        verbose_name=_('Період'),
     )
     status = models.CharField(
         max_length=20,
         choices=PaymentStatus.choices,
-        default=PaymentStatus.COMPLETED,
+        default=PaymentStatus.PAID,
         db_index=True,
-        verbose_name=_('Payment Status')
+        verbose_name=_('Статус'),
     )
     comment = models.TextField(
         blank=True,
-        null=True,
-        verbose_name=_('Comment')
+        # For grants: can hold the grant agreement number
+        verbose_name=_('Коментар'),
     )
     
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('Created At')
+        verbose_name=_('Створено'),
     )
     
     class Meta:
-        verbose_name = _('Payment')
-        verbose_name_plural = _('Payments')
+        verbose_name = _('Платіж')
+        verbose_name_plural = _('Платежі')
         ordering = ['-date', '-created_at']
         indexes = [
             models.Index(fields=['date', 'status'], name='idx_payment_date_status'),
@@ -83,4 +89,5 @@ class Payment(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.member} - {self.amount} EUR ({self.date})"
+        who = self.member if self.member else (self.source_name or self.get_type_display())
+        return f"{who} — {self.amount} EUR ({self.date})"

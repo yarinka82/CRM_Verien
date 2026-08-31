@@ -28,6 +28,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """Used only for PATCH/PUT — role and active status, nothing else."""
+    class Meta:
+        model = User
+        fields = ['is_staff', 'is_active']
+
+
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True, validators=[validate_password])
