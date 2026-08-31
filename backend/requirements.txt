@@ -1,5 +1,7 @@
 asgiref==3.12.1
 Django==6.1
+django-filter
+django-cors-headers
 django-stubs==6.1.0
 django-stubs-ext==6.1.0
 djangorestframework==3.18.0
