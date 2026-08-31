@@ -8,23 +8,29 @@
   },
   "nav": {
     "home": "Home",
-    "members": "Members"
+    "members": "Members",
+    "settings": "Settings"
   },
   "common": {
-    "back": "Back",
-    "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating...",
+    "back": "Back",
     "edit": "Edit",
     "view": "View",
     "delete": "Delete",
+    "deleting": "Deleting...",
     "actions": "Actions",
     "clearFilters": "Clear filters",
-    "loading": "Loading...",
-    "create": "Create",
-    "creating": "Creating..."
+    "loading": "Loading..."
   },
   "members": {
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete Member?",
+    "deleteConfirmText": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+    "deleteError": "Failed to delete member.",
     "title": "Club Members",
     "addMember": "Add Member",
     "editMember": "Edit Member",
@@ -48,6 +54,7 @@
     "founderDescription": "Participated in the founding meeting",
     "notFounderDescription": "Regular club member",
     "showFoundersOnly": "Show only founders",
+    "searchPlaceholder": "Search by name, email, phone...",
     "noMembers": "No members",
     "totalMembers": "Total members",
     "showing": "Showing",
@@ -56,7 +63,6 @@
     "registryTitle": "Member Registry",
     "totalRecords": "{{count}} records",
     "onlyFounders": "only founders",
-    "searchPlaceholder": "Search by name or email",
     "all": "All",
     "founders": "Founders",
     "loadError": "Failed to load list: {{error}}",
@@ -67,6 +73,7 @@
 "settings": {
     "title": "Settings",
     "subtitle": "Account & Users",
+    "you": "You",
     "changePassword": "Change Password",
     "currentPassword": "Current Password",
     "newPassword": "New Password",
@@ -89,7 +96,31 @@
     "adminLabel": "Administrator (can manage users)",
     "unexpectedResponse": "Unexpected response from server.",
     "loadUsersError": "Failed to load users.",
-    "createUserError": "Failed to create user."
+    "createUserError": "Failed to create user.",
+    "updateUserError": "Failed to update user.",
+    "deleteUserError": "Failed to delete user.",
+    "deleteUserTitle": "Delete User?",
+    "deleteUserConfirm": "Are you sure you want to delete user \"{{username}}\"? This action cannot be undone.",
+    "editUser": "Edit User",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cannotDeleteSelf": "Cannot delete yourself",
+    "cannotEditSelfRole": "Cannot edit your own role"
+  },
+  "login": {
+    "brandTitle": "Association Registry",
+    "brandSubtitle": "Members, contributions and revenues in one place.",
+    "title": "Login",
+    "subtitle": "Log in to continue working with the registry.",
+    "usernameLabel": "Username",
+    "passwordLabel": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Login",
+    "submitting": "Logging in...",
+    "errorGeneric": "Login failed."
   }
+
+
 
 }

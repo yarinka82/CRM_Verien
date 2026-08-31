@@ -1,9 +1,13 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Box, Typography, TextField, Button, Alert } from '@mui/material';
-import { useAuth } from './AuthContext';
-import {tokens} from "@/pages/components/theme.ts";
+import { useTranslation } from 'react-i18next';
+import { Box, Typography, TextField, Button, Alert, IconButton, InputAdornment } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import {tokens} from "@/pages/Members/components/theme.ts";
+import {useAuth} from "@/hooks";
+import LanguageSwitcher from "@/components/LanguageSwitcher.tsx";
+
 
 
 // Original geometric illustration — a wax-seal + open ledger motif,
@@ -37,15 +41,17 @@ const RegistrySeal: React.FC = () => (
 );
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const from = (location.state as { from?: Location })?.from?.pathname || '/members';
+  const from = (location.state as { from?: Location })?.from?.pathname || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,14 +61,21 @@ const Login: React.FC = () => {
       await login(username, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не вдалося увійти.');
+      setError(err instanceof Error ? err.message : t('login.errorGeneric'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+
+    <Box sx={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
+            {/* Переключатель языка — в правом верхнем углу поверх всего */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
+        <LanguageSwitcher />
+      </Box>
+
+
       {/* Left — illustration panel, hidden on narrow screens */}
       <Box
         sx={{
@@ -82,13 +95,13 @@ const Login: React.FC = () => {
           variant="h5"
           sx={{ color: tokens.paperElevated, mt: 2, textAlign: 'center' }}
         >
-          Реєстр об'єднання
+          {t('login.brandTitle')}
         </Typography>
         <Typography
           variant="body2"
           sx={{ color: tokens.muted, mt: 1, textAlign: 'center', maxWidth: 320 }}
         >
-          Члени, внески та надходження — в одному місці.
+          {t('login.brandSubtitle')}
         </Typography>
       </Box>
 
@@ -106,10 +119,10 @@ const Login: React.FC = () => {
       >
         <Box sx={{ width: '100%', maxWidth: 360 }}>
           <Typography variant="h4" sx={{ color: tokens.ink, mb: 0.5 }}>
-            Вхід
+            {t('login.title')}
           </Typography>
           <Typography variant="body2" sx={{ color: tokens.muted, mb: 4 }}>
-            Увійдіть, щоб продовжити роботу з реєстром.
+            {t('login.subtitle')}
           </Typography>
 
           {error && (
@@ -121,7 +134,7 @@ const Login: React.FC = () => {
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Ім'я користувача"
+              label={t('login.usernameLabel')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               margin="normal"
@@ -130,12 +143,28 @@ const Login: React.FC = () => {
             />
             <TextField
               fullWidth
-              type="password"
-              label="Пароль"
+              type={showPassword ? 'text' : 'password'}
+              label={t('login.passwordLabel')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               sx={{ bgcolor: tokens.paperElevated }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
             />
             <Button
               type="submit"
@@ -149,7 +178,7 @@ const Login: React.FC = () => {
                 '&:hover': { bgcolor: tokens.registryDark },
               }}
             >
-              {submitting ? 'Вхід...' : 'Увійти'}
+              {submitting ? t('login.submitting') : t('login.submit')}
             </Button>
           </Box>
         </Box>

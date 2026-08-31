@@ -8,7 +8,8 @@
   },
   "nav": {
     "home": "Startseite",
-    "members": "Mitglieder"
+    "members": "Mitglieder",
+    "settings": "Einstellungen"
   },
   "common": {
     "save": "Speichern",
@@ -20,11 +21,16 @@
     "edit": "Bearbeiten",
     "view": "Ansehen",
     "delete": "Löschen",
+    "deleting": "Löschen...",
     "actions": "Aktionen",
     "clearFilters": "Filter löschen",
     "loading": "Laden..."
   },
   "members": {
+    "delete": "Löschen",
+    "deleteConfirmTitle": "Mitglied löschen?",
+    "deleteConfirmText": "Sind Sie sicher, dass Sie {{name}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteError": "Mitglied konnte nicht gelöscht werden.",
     "title": "Vereinsmitglieder",
     "addMember": "Mitglied hinzufügen",
     "editMember": "Mitglied bearbeiten",
@@ -64,9 +70,10 @@
     "emptyDescription": "Fügen Sie das erste Mitglied hinzu, um das Verzeichnis zu starten.",
     "founderTooltip": "Gründer des Vereins"
   },
-  "settings": {
+"settings": {
     "title": "Einstellungen",
     "subtitle": "Konto und Benutzer",
+    "you": "Sie",
     "changePassword": "Passwort ändern",
     "currentPassword": "Aktuelles Passwort",
     "newPassword": "Neues Passwort",
@@ -89,7 +96,29 @@
     "adminLabel": "Administrator (kann Benutzer verwalten)",
     "unexpectedResponse": "Unerwartete Antwort vom Server.",
     "loadUsersError": "Benutzer konnten nicht geladen werden.",
-    "createUserError": "Benutzer konnte nicht erstellt werden."
+    "createUserError": "Benutzer konnte nicht erstellt werden.",
+    "updateUserError": "Benutzer konnte nicht aktualisiert werden.",
+    "deleteUserError": "Benutzer konnte nicht gelöscht werden.",
+    "deleteUserTitle": "Benutzer löschen?",
+    "deleteUserConfirm": "Sind Sie sicher, dass Sie den Benutzer \"{{username}}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "editUser": "Benutzer bearbeiten",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "cannotDeleteSelf": "Sie können sich nicht selbst löschen",
+    "cannotEditSelfRole": "Sie können Ihre eigene Rolle nicht ändern"
+  },
+  "login": {
+    "brandTitle": "Vereinsregister",
+    "brandSubtitle": "Mitglieder, Beiträge und Einnahmen an einem Ort.",
+    "title": "Anmelden",
+    "subtitle": "Melden Sie sich an, um mit dem Register zu arbeiten.",
+    "usernameLabel": "Benutzername",
+    "passwordLabel": "Passwort",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort ausblenden",
+    "submit": "Anmelden",
+    "submitting": "Anmeldung...",
+    "errorGeneric": "Anmeldung fehlgeschlagen."
   }
-}
 
+}

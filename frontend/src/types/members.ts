@@ -41,3 +41,4 @@ export interface MemberListResponse {
   previous: string | null;
   results: Member[];
 }
+
