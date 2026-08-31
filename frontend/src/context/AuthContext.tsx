@@ -1,30 +1,7 @@
 
-
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { apiFetch } from '@/api/client';
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  is_staff: boolean;
-  is_active: boolean;
-  date_joined: string;
-  first_name?: string;
-  last_name?: string;
-}
-
-export interface AuthContextValue {
-  user: User | null;
-  username: string | null;
-  loading: boolean;
-  error: string | null;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
-  isStaff: boolean;
-  userId: number | null;
-}
+import { AuthContextValue, User } from "@/types/users.ts";
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -34,12 +11,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
+    // Сессия живёт в cookie, а не в localStorage —
+    // всегда пытаемся восстановить пользователя с бэкенда
+    fetchUser();
   }, []);
 
   const fetchUser = async () => {
@@ -49,10 +23,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Failed to fetch user');
       }
       const data = await response.json();
-      setUser(data);
+      setUser(data.id ? data : null);
     } catch (err) {
-      console.error('Error fetching user:', err);
-      localStorage.removeItem('token');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -66,18 +39,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         method: 'POST',
         body: JSON.stringify({ username, password }),
       });
-  
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
 
-      // При сессионной аутентификации токен не нужен
-      // Просто сохраняем пользователя
       setUser(data);
       window.location.href = '/home';
-
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Login failed');
@@ -87,9 +57,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await apiFetch('/api/auth/logout/', { method: 'POST' });
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setUser(null);
+    }
   };
 
   const value: AuthContextValue = {
@@ -114,3 +89,4 @@ export const useAuth = (): AuthContextValue => {
   }
   return context;
 };
+

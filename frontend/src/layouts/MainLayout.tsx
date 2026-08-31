@@ -1,13 +1,20 @@
 
 import React from 'react';
-import { Outlet } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography } from '@mui/material';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { Box, AppBar, Toolbar, Typography, Button } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 import Sidebar from '../components/Sidebar';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useAuth } from '../hooks/useAuth';
 
 const MainLayout: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5' }}>
@@ -28,20 +35,25 @@ const MainLayout: React.FC = () => {
             flexShrink: 0,
           }}
         >
-          <Toolbar>
+          <Toolbar sx={{ gap: 1 }}>
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
               CRM Verien
             </Typography>
 
-            {/* User info */}
-            {user && (
-              <Typography variant="body2" sx={{ mr: 2, color: 'text.secondary' }}>
-                {user.username}
-              </Typography>
-            )}
-
             {/* Language Switcher */}
             <LanguageSwitcher />
+
+            {/* User info + Logout */}
+            {user && (
+              <Button
+                size="small"
+                onClick={handleLogout}
+                startIcon={<LogoutIcon fontSize="small" />}
+                sx={{ color: 'text.secondary' }}
+              >
+                {user.username}
+              </Button>
+            )}
           </Toolbar>
         </AppBar>
 
