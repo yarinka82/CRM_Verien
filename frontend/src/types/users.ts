@@ -22,3 +22,4 @@ export interface AuthContextValue {
   isStaff: boolean;
   userId: number | null;
 }
+
