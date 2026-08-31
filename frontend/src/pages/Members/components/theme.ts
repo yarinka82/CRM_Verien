@@ -1,15 +1,16 @@
 import { createTheme } from '@mui/material/styles';
 
-// Verein Registry theme — ink/registry-green/seal-gold palette
-// Evokes an official association ledger, not a generic SaaS dashboard.
+// Verein Registry theme — ink/registry-blue/seal-gold palette
+// Evokes an official association ledger with a Ukrainian civic accent,
+// not a generic SaaS dashboard.
 
 export const tokens = {
-  ink: '#1B2A3A',
+  ink: '#16233B',
   paper: '#EDEFEA',
   paperElevated: '#F7F8F5',
-  registry: '#2F6F5E',
-  registryDark: '#204B3F',
-  sealGold: '#B8863B',
+  registry: '#0057B7',
+  registryDark: '#003D82',
+  sealGold: '#FFC72C',
   muted: '#9AA5A0',
   divider: '#D8DCD4',
   danger: '#A44A3F',
@@ -28,7 +29,7 @@ const theme = createTheme({
     },
     secondary: {
       main: tokens.sealGold,
-      contrastText: '#1B2A3A',
+      contrastText: '#16233B',
     },
     text: {
       primary: tokens.ink,
