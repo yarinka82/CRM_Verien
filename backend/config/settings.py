@@ -11,14 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY - с запасным вариантом
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-your-secret-key-here-for-development")
 
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get(
-        "ALLOWED_HOSTS",
-        "localhost,127.0.0.1"
-    ).split(",")
+    for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
     if host.strip()
 ]
 
@@ -76,17 +73,35 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
 ]
-# Для удобства разработки (НЕ ДЛЯ ПРОДАКШЕНА!)
-CSRF_COOKIE_HTTPONLY = False
-SESSION_COOKIE_HTTPONLY = False
+
+CSRF_COOKIE_HTTPONLY = os.environ.get(
+    "CSRF_COOKIE_HTTPONLY", "True"
+).lower() == "true"
+
+SESSION_COOKIE_HTTPONLY = os.environ.get(
+    "SESSION_COOKIE_HTTPONLY", "True"
+).lower() == "true"
 
 ROOT_URLCONF = 'config.urls'
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ["DATABASE_URL"]
-    )
-}
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME"),
+            "USER": os.environ.get("DB_USER"),
+            "PASSWORD": os.environ.get("DB_PASSWORD"),
+            "HOST": os.environ.get("DB_HOST", "localhost"),
+            "PORT": os.environ.get("DB_PORT", "5432"),
+        }
+    }
 
 
 TEMPLATES = [
