@@ -65,3 +65,4 @@ build/
 # Coverage
 coverage/
 .nyc_output/
+/backend/.env
