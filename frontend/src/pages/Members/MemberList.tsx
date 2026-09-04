@@ -28,14 +28,21 @@ import {
   DialogContentText,
   DialogActions,
   Alert,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import DeleteOutlineIcon from '@mui/icons-material/Delete';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import TableViewIcon from '@mui/icons-material/TableView';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
-import {apiFetch} from "@/api/client.ts";
-import {tokens} from "@/pages/Members/components/theme.ts";
+import { apiFetch } from "@/api/client.ts";
+import { tokens } from "@/pages/Members/components/theme.ts";
 
 interface Member {
   id: number;
@@ -51,7 +58,6 @@ interface Member {
 type FounderFilter = 'all' | 'founders';
 type StatusFilter = 'all' | 'active' | 'inactive';
 
-// API always sends ISO (YYYY-MM-DD) — this only affects what's shown on screen.
 const formatDate = (isoDate: string) => {
   const d = dayjs(isoDate);
   return d.isValid() ? d.format('DD.MM.YYYY') : isoDate;
@@ -66,6 +72,9 @@ const MemberList: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [query, setQuery] = useState('');
+
+  // Меню экспорта
+  const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -107,6 +116,113 @@ const MemberList: React.FC = () => {
       });
   }, [members, founderFilter, statusFilter, query, sortOrder]);
 
+  // ---- 1. Экспорт в CSV (с поддержкой Excel UTF-8) ----
+  const handleExportCSV = () => {
+    setExportAnchorEl(null);
+    if (!filtered.length) return;
+
+    const headers = [
+      t('members.fullName', 'ПІБ'),
+      t('members.email', 'Email'),
+      t('members.phone', 'Телефон'),
+      t('members.joinedDate', 'Дата вступу'),
+      t('members.status', 'Статус'),
+      t('members.isFounder', 'Засновник'),
+    ];
+
+    const rows = filtered.map((m) => [
+      `"${m.last_name} ${m.first_name}"`,
+      `"${m.email || ''}"`,
+      `"${m.phone || ''}"`,
+      `"${formatDate(m.join_date)}"`,
+      `"${m.status === 'active' ? t('members.statusActive', 'Активний') : t('members.statusInactive', 'Неактивний')}"`,
+      `"${m.is_founder ? t('common.yes', 'Так') : t('common.no', 'Ні')}"`,
+    ]);
+
+    // Добавляем \uFEFF (Byte Order Mark), чтобы Excel корректно открывал кириллицу
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `members_${dayjs().format('YYYY-MM-DD')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // ---- 2. Экспорт в PDF (через окно печати с готовыми стилями) ----
+  const handleExportPDF = () => {
+    setExportAnchorEl(null);
+    if (!filtered.length) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${t('members.title', 'Члени організації')} - ${dayjs().format('DD.MM.YYYY')}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; color: #1a1a1a; }
+            h2 { margin-bottom: 5px; }
+            p { margin-top: 0; color: #666; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+            th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+            th { background-color: #f4f4f4; font-weight: bold; }
+            tr:nth-child(even) { background-color: #fafafa; }
+            .founder { font-weight: bold; color: #b8860b; }
+            @media print {
+              @page { size: landscape; margin: 10mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <h2>${t('members.title', 'Список членів організації')}</h2>
+          <p>${t('members.totalRecords', { count: filtered.length })} | ${dayjs().format('DD.MM.YYYY HH:mm')}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>${t('members.fullName', 'ПІБ')}</th>
+                <th>${t('members.email', 'Email')}</th>
+                <th>${t('members.phone', 'Телефон')}</th>
+                <th>${t('members.joinedDate', 'Дата вступу')}</th>
+                <th>${t('members.status', 'Статус')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered
+                .map(
+                  (m, idx) => `
+                <tr>
+                  <td>${idx + 1}</td>
+                  <td>${m.last_name} ${m.first_name} ${m.is_founder ? '<span class="founder">★</span>' : ''}</td>
+                  <td>${m.email || '—'}</td>
+                  <td>${m.phone || '—'}</td>
+                  <td>${formatDate(m.join_date)}</td>
+                  <td>${m.status === 'active' ? t('members.statusActive', 'Активний') : t('members.statusInactive', 'Неактивний')}</td>
+                </tr>
+              `
+                )
+                .join('')}
+            </tbody>
+          </table>
+          <script>
+            window.onload = () => {
+              window.print();
+              window.onafterprint = () => window.close();
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -119,9 +235,7 @@ const MemberList: React.FC = () => {
       setMembers((prev) => prev.filter((m) => m.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (err) {
-      setDeleteError(
-        err instanceof Error ? err.message : t('members.deleteError')
-      );
+      setDeleteError(err instanceof Error ? err.message : t('members.deleteError'));
     } finally {
       setDeleting(false);
     }
@@ -155,18 +269,52 @@ const MemberList: React.FC = () => {
             {t('members.title')}
           </Typography>
         </Box>
-        <Button
-          component={RouterLink}
-          to="/members/add"
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{
-            bgcolor: tokens.registry,
-            '&:hover': { bgcolor: tokens.registryDark },
-          }}
-        >
-          {t('members.addMember')}
-        </Button>
+
+        {/* Кнопки действий: Экспорт + Добавить */}
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+          <Button
+            variant="outlined"
+            startIcon={<FileDownloadIcon />}
+            onClick={(e) => setExportAnchorEl(e.currentTarget)}
+            disabled={filtered.length === 0}
+            sx={{ borderColor: tokens.divider, color: tokens.ink }}
+          >
+            {t('common.export', 'Експорт')}
+          </Button>
+
+          {/* Меню выбора формата экспорта */}
+          <Menu
+            anchorEl={exportAnchorEl}
+            open={Boolean(exportAnchorEl)}
+            onClose={() => setExportAnchorEl(null)}
+          >
+            <MenuItem onClick={handleExportCSV}>
+              <ListItemIcon>
+                <TableViewIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('common.exportCSV', 'Експорт у CSV (Excel)')}</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleExportPDF}>
+              <ListItemIcon>
+                <PictureAsPdfIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t('common.exportPDF', 'Експорт у PDF')}</ListItemText>
+            </MenuItem>
+          </Menu>
+
+          <Button
+            component={RouterLink}
+            to="/members/add"
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{
+              bgcolor: tokens.registry,
+              '&:hover': { bgcolor: tokens.registryDark },
+            }}
+          >
+            {t('members.addMember')}
+          </Button>
+        </Box>
       </Box>
 
       <Typography variant="body2" sx={{ color: tokens.muted, mb: 3 }}>
@@ -274,7 +422,9 @@ const MemberList: React.FC = () => {
                     {t('members.joinedDate')}
                   </TableSortLabel>
                 </TableCell>
+
                 <TableCell>{t('members.status')}</TableCell>
+
                 <TableCell align="right" />
               </TableRow>
             </TableHead>

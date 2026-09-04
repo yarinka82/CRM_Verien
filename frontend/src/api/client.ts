@@ -1,5 +1,4 @@
 
-
 import axios from 'axios';
 
 axios.defaults.withCredentials = true;
@@ -33,31 +32,53 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
   });
 }
 
+// Единая обработка ответа: бросает осмысленную ошибку на не-ok,
+// безопасно обрабатывает пустое тело (204 No Content и подобные).
+async function handleResponse(response: Response) {
+  if (!response.ok) {
+    let detail = response.statusText;
+    try {
+      const text = await response.text();
+      if (text) detail = text;
+    } catch {
+      // тело недоступно — оставляем statusText
+    }
+    throw new Error(`Request failed: ${response.status} ${detail}`);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
 // Для совместимости с axios интерцепторами (если нужны)
 export const apiClient = {
   get: async (url: string) => {
     const response = await apiFetch(url);
-    return response.json();
+    return handleResponse(response);
   },
   post: async (url: string, data: any) => {
     const response = await apiFetch(url, {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    return response.json();
+    return handleResponse(response);
   },
   patch: async (url: string, data: any) => {
     const response = await apiFetch(url, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
-    return response.json();
+    return handleResponse(response);
   },
   delete: async (url: string) => {
     const response = await apiFetch(url, {
       method: 'DELETE',
     });
-    return response.json();
+    return handleResponse(response);
   },
 };
 

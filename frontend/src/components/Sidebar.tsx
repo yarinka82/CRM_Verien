@@ -10,30 +10,58 @@ import {
   ListItemIcon,
   Tooltip,
 } from '@mui/material';
-import {
-  Home,
-  Group as GroupIcon,
-  Settings as SettingsIcon,
-} from '@mui/icons-material';
+
+// Иконки
+import HomeIcon from '@mui/icons-material/Home';
+import GroupIcon from '@mui/icons-material/Group';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
 
-  const isActive = (path: string) => location.pathname === path;
+  // Подсветка активного пункта (включая вложенные пути вроде /members/12)
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
 
   // Основные пункты меню
   const menuItems = [
-    { label: t('nav.home'), icon: <Home />, path: '/' },
-    { label: t('nav.members'), icon: <GroupIcon />, path: '/members' },
-    // TODO: Добавить другие пункты позже
-    // { label: t('nav.clients'), icon: <People />, path: '/clients' },
-  ];
+    {
+      label: t('nav.home', 'Головна'),
+      icon: <HomeIcon />,
+      path: '/'
+    },
+    {
+      label: t('nav.members', 'Реєстр членів'),
+      icon: <GroupIcon />,
+      path: '/members'
+    },
+    {
+      label: t('nav.cashDesk', 'Каса та надходження'),
+      icon: <AccountBalanceWalletIcon />,
+      path: '/cashdesk'
+    },
+  {
+    label: t('nav.financeAnalytics', 'Фінансовий огляд (Таблиця)'),
+    icon: <TableChartIcon />,
+    path: '/finance'
+  },
+  {
+    label: t('nav.financeCharts', 'Графіки та тренди'),
+    icon: <ShowChartIcon />,
+    path: '/charts'
+  },
+];
 
   const renderItem = (item: { label: string; icon: React.ReactNode; path: string }) => (
     <ListItem disablePadding key={item.path} sx={{ mb: 1.5, justifyContent: 'center' }}>
-      <Tooltip title={item.label} placement="right">
+      <Tooltip title={item.label} placement="right" arrow>
         <ListItemButton
           selected={isActive(item.path)}
           onClick={() => navigate(item.path)}
@@ -47,10 +75,12 @@ const Sidebar: React.FC = () => {
             '&.Mui-selected': {
               bgcolor: 'primary.main',
               color: 'white',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              },
             },
             '&:hover': {
-              bgcolor: 'primary.light',
-              color: 'white',
+              bgcolor: 'action.hover',
             },
           }}
         >
@@ -83,29 +113,20 @@ const Sidebar: React.FC = () => {
         borderColor: 'divider',
         overflowY: 'auto',
         overflowX: 'hidden',
-        '&::-webkit-scrollbar': {
-          width: '4px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: '#f1f1f1',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: '#c1c1c1',
-          borderRadius: '4px',
-          '&:hover': {
-            background: '#a1a1a1',
-          },
-        },
       }}
     >
-      <List sx={{ width: '100%' }}>
+      {/* Верхний список навигации */}
+      <List sx={{ width: '100%', p: 0 }}>
         {menuItems.map(renderItem)}
       </List>
 
-      {/* Settings pinned to the bottom, separate from the main nav list */}
-      <List sx={{ width: '100%' }}>
-        {renderItem({ label: t('nav.settings'), icon: <SettingsIcon />, path: '/settings' })}
+      {/* Настройки внизу сайдбара */}
+      <List sx={{ width: '100%', p: 0 }}>
+        {renderItem({
+          label: t('nav.settings', 'Налаштування'),
+          icon: <SettingsIcon />,
+          path: '/settings'
+        })}
       </List>
     </Box>
   );

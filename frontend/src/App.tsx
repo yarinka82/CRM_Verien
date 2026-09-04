@@ -1,11 +1,11 @@
 
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AuthProvider } from './context/AuthContext';
 import { MainLayout } from './layouts';
-import { Home, Login, MemberList, MemberDetail, MemberForm, Settings } from './pages';
+import { Home, Login, MemberList, MemberDetail, MemberForm, Settings, FinanceOverview, FinanceChartsPage, CashDeskPage } from './pages';
+
 import ProtectedRoute from './ProtectedRoute';
 
 function App() {
@@ -37,6 +37,9 @@ function App() {
             <Route path="members/add" element={<MemberForm />} />
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="members/:id/edit" element={<MemberForm />} />
+            <Route path="cashdesk" element={<CashDeskPage />} />
+            <Route path="finance" element={<FinanceOverview />} />
+            <Route path="charts" element={<FinanceChartsPage />} />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>

@@ -4,4 +4,8 @@
     <option name="sdkName" value="Python 3.12 (CRM_Verien)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (CRM_Verien)" project-jdk-type="Python SDK" />
+  <component name="ViteConfiguration">
+    <option name="mode" value="MANUAL" />
+    <option name="path" value="$PROJECT_DIR$/frontend/vite.config.ts" />
+  </component>
 </project>

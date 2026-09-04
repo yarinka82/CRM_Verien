@@ -7,11 +7,23 @@
     "openRegistry": "Open registry"
   },
   "nav": {
-    "home": "Home",
-    "members": "Members",
+    "home": "Dashboard",
+    "members": "Members Registry",
+    "cashDesk": "Cash Desk & Incomes",
+    "financeAnalytics": "Financial Analytics",
+    "financeCharts": "Charts & Trends",
     "settings": "Settings"
   },
   "common": {
+    "all": "All",
+    "refresh": "Refresh",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "export": "Export",
+    "exportCSV": "Export to CSV (Excel)",
+    "exportPDF": "Export to PDF",
+    "yes": "Yes",
+    "no": "No",
     "save": "Save",
     "saving": "Saving...",
     "cancel": "Cancel",
@@ -24,7 +36,11 @@
     "deleting": "Deleting...",
     "actions": "Actions",
     "clearFilters": "Clear filters",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "exportSuccess": "CSV file successfully exported",
+    "exportError": "Failed to export CSV file",
+    "printReady": "PDF print window opened",
+    "popupBlocked": "Please allow pop-ups for PDF printing"
   },
   "members": {
     "delete": "Delete",
@@ -70,7 +86,7 @@
     "emptyDescription": "Add the first member to start the registry.",
     "founderTooltip": "Association Founder"
   },
-"settings": {
+  "settings": {
     "title": "Settings",
     "subtitle": "Account & Users",
     "you": "You",
@@ -119,8 +135,117 @@
     "submit": "Login",
     "submitting": "Logging in...",
     "errorGeneric": "Login failed."
-  }
-
-
-
+  },
+  "payments": {
+    "types": {
+      "membership_fee": "Membership Fee",
+      "donation": "Donation",
+      "sponsorship": "Sponsorship",
+      "event": "Event Fee",
+      "grant": "Grant",
+      "other": "Other"
+    },
+    "statuses": {
+      "paid": "Paid",
+      "owed": "Owed",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "title": {
+      "history": "Payment History"
+    },
+    "actions": {
+      "add": "Add Payment"
+    },
+    "empty": "No payments yet",
+    "fields": {
+      "date": "Date",
+      "type": "Type",
+      "period": "Period",
+      "amount": "Amount",
+      "status": "Status",
+      "sourceName": "Source",
+      "comment": "Comment"
+    },
+    "summary": {
+      "totalPaid": "Total Paid",
+      "totalOwed": "Total Owed"
+    },
+    "dialogs": {
+      "addTitle": "New Payment",
+      "editTitle": "Edit Payment",
+      "confirmDelete": "Are you sure you want to delete this payment?",
+      "confirmDeleteTitle": "Delete Payment?",
+      "confirmDeleteText": "Are you sure you want to delete this payment of"
+    },
+    "validation": {
+      "amountRequired": "Please enter an amount greater than zero"
+    },
+    "messages": {
+      "loadError": "Failed to load payments",
+      "createSuccess": "Payment successfully added",
+      "updateSuccess": "Payment successfully updated",
+      "saveError": "Failed to save payment",
+      "deleteSuccess": "Payment successfully deleted",
+      "deleteError": "Failed to delete payment"
+    }
+  },
+  "cashDesk": {
+    "title": "Cash Desk & Incomes",
+    "subtitle": "Financial Accounting",
+    "addIncome": "Add Income",
+    "addFirstIncome": "Add First Payment",
+    "totalTransactions": "Total Transactions",
+    "payerOrSource": "Payer / Source",
+    "searchPlaceholder": "Search by payer, source, period...",
+    "emptyTitle": "No incomes found",
+    "loadError": "Failed to load cash desk data",
+    "fields": {
+      "selectMember": "Organization Member *",
+      "searchMemberPlaceholder": "Start typing member name...",
+      "sourcePlaceholder": "E.g.: Renaissance Foundation, Anonymous Donation"
+    },
+    "validation": {
+      "memberRequired": "Please select a member for membership fee",
+      "sourceRequired": "Please specify source or donor name"
+    },
+    "dialog": {
+      "addTitle": "New Financial Income",
+      "editTitle": "Edit Income"
+    }
+  },
+  "financeOverview": {
+    "title": "Financial Overview",
+    "totalPaid": "Received (Paid)",
+    "totalOwed": "Total Owed",
+    "monthlyDynamics": "Monthly Dynamics",
+    "subtitle": "Financial Reporting & Analytics",
+    "today": "Current",
+    "yearSuffix": "year",
+    "empty": "No transactions found for this period",
+    "totalIncomes": "Total Received",
+    "monthCol": "Month",
+    "dateCol": "Date",
+    "totalPaidCol": "Total Paid",
+    "totalOwedCol": "Owed",
+    "loadError": "Failed to load analytics",
+    "modes": {
+      "month": "Month",
+      "quarter": "Quarter",
+      "year": "Year"
+    }
+  },
+  "financeCharts": {
+    "title": "Dynamics & Charts",
+    "subtitle": "Visualization & Trends",
+    "totalPaid": "Total Received",
+    "totalOwed": "Total Owed",
+    "chartTitle": "Revenue Dynamics",
+    "loadError": "Failed to load charts"
 }
+}
+
+
+
+

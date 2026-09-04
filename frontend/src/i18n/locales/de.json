@@ -7,11 +7,23 @@
     "openRegistry": "Register öffnen"
   },
   "nav": {
-    "home": "Startseite",
-    "members": "Mitglieder",
+    "home": "Übersicht",
+    "members": "Mitgliederverzeichnis",
+    "cashDesk": "Kasse & Einnahmen",
+    "financeAnalytics": "Finanzanalyse & Berichte",
+    "financeCharts": "Diagramme & Trends",
     "settings": "Einstellungen"
   },
   "common": {
+    "all": "Alle",
+    "dateFrom": "Von",
+    "dateTo": "Bis",
+    "export": "Exportieren",
+    "exportCSV": "Export als CSV (Excel)",
+    "exportPDF": "Export als PDF",
+    "yes": "Ja",
+    "no": "Nein",
+    "refresh": "Aktualisieren",
     "save": "Speichern",
     "saving": "Speichern...",
     "cancel": "Abbrechen",
@@ -24,7 +36,11 @@
     "deleting": "Löschen...",
     "actions": "Aktionen",
     "clearFilters": "Filter löschen",
-    "loading": "Laden..."
+    "loading": "Laden...",
+    "exportSuccess": "CSV-Datei erfolgreich exportiert",
+    "exportError": "Fehler beim CSV-Export",
+    "printReady": "PDF-Druckfenster geöffnet",
+    "popupBlocked": "Bitte Pop-ups für den PDF-Druck erlauben"
   },
   "members": {
     "delete": "Löschen",
@@ -70,7 +86,7 @@
     "emptyDescription": "Fügen Sie das erste Mitglied hinzu, um das Verzeichnis zu starten.",
     "founderTooltip": "Gründer des Vereins"
   },
-"settings": {
+  "settings": {
     "title": "Einstellungen",
     "subtitle": "Konto und Benutzer",
     "you": "Sie",
@@ -119,6 +135,118 @@
     "submit": "Anmelden",
     "submitting": "Anmeldung...",
     "errorGeneric": "Anmeldung fehlgeschlagen."
-  }
+  },
+  "payments": {
+    "types": {
+      "membership_fee": "Mitgliedsbeitrag",
+      "donation": "Spende",
+      "sponsorship": "Sponsoring",
+      "event": "Veranstaltungsgebühr",
+      "grant": "Zuschuss / Förderung",
+      "other": "Sonstiges"
+    },
+    "statuses": {
+      "paid": "Bezahlt",
+      "owed": "Ausstehend",
+      "pending": "Ausstehend",
+      "cancelled": "Storniert",
+      "refunded": "Erstattet"
+    },
+    "title": {
+      "history": "Zahlungshistorie"
+    },
+    "actions": {
+      "add": "Zahlung hinzufügen"
+    },
+    "empty": "Noch keine Zahlungen vorhanden",
+    "fields": {
+      "date": "Datum",
+      "type": "Typ",
+      "period": "Zeitraum",
+      "amount": "Betrag",
+      "status": "Status",
+      "sourceName": "Quelle",
+      "comment": "Kommentar"
+    },
+    "summary": {
+      "totalPaid": "Bezahlt",
+      "totalOwed": "Ausstehend"
+    },
+    "dialogs": {
+      "addTitle": "Neue Zahlung",
+      "editTitle": "Zahlung bearbeiten",
+      "confirmDelete": "Möchten Sie diese Zahlung wirklich löschen?",
+      "confirmDeleteTitle": "Zahlung löschen?",
+      "confirmDeleteText": "Sind Sie sicher, dass Sie diese Zahlung in Höhe von löschen möchten:"
+    },
+    "validation": {
+      "amountRequired": "Bitte geben Sie einen Betrag größer als null ein"
+    },
+    "messages": {
+      "loadError": "Fehler beim Laden der Zahlungen",
+      "createSuccess": "Zahlung erfolgreich hinzugefügt",
+      "updateSuccess": "Zahlung erfolgreich aktualisiert",
+      "saveError": "Fehler beim Speichern der Zahlung",
+      "deleteSuccess": "Zahlung erfolgreich gelöscht",
+      "deleteError": "Zahlung konnte nicht gelöscht werden"
+    }
+  },
+  "cashDesk": {
+    "title": "Kasse & Einnahmenjournal",
+    "subtitle": "Finanzbuchhaltung",
+    "addIncome": "Einnahme hinzufügen",
+    "addFirstIncome": "Erste Zahlung hinzufügen",
+    "totalTransactions": "Gesamttransaktionen",
+    "payerOrSource": "Zahler / Quelle",
+    "searchPlaceholder": "Suche nach Zahler, Quelle, Zeitraum...",
+    "emptyTitle": "Keine Einnahmen gefunden",
+    "loadError": "Fehler beim Laden der Kassendaten",
+    "fields": {
+      "selectMember": "Mitglied der Organisation *",
+      "searchMemberPlaceholder": "Name eingeben...",
+      "sourcePlaceholder": "Z.B.: Renaissance-Stiftung, Spende"
+    },
+    "validation": {
+      "memberRequired": "Bitte wählen Sie ein Mitglied für den Beitrag aus",
+      "sourceRequired": "Bitte geben Sie die Quelle oder Organisation an"
+    },
+    "dialog": {
+      "addTitle": "Neue Einnahme",
+      "editTitle": "Einnahme bearbeiten"
+    }
+  },
+  "financeOverview": {
+    "totalPaid": "Erhalten (bezahlt)",
+    "monthlyDynamics": "Monatliche Entwicklung",
+    "loadError": "Finanzübersicht konnte nicht geladen werden",
+    "title": "Finanzanalyse & Berichte",
+    "subtitle": "Finanzberichterstattung und Aufschlüsselung",
+    "today": "Aktuell",
+    "yearSuffix": "Jahr",
+    "empty": "Keine Transaktionen im ausgewählten Zeitraum",
+    "totalIncomes": "Gesamteinnahmen",
+    "totalOwed": "Ausstehende Beträge",
+    "monthCol": "Monat",
+    "dateCol": "Datum",
+    "totalPaidCol": "Bezahlt Gesamt",
+    "totalOwedCol": "Rückstand",
+    "modes": {
+      "month": "Monat",
+      "quarter": "Quartal",
+      "year": "Jahr"
+    }
+  },
+  "financeCharts": {
+  "title": "Finanzdiagramme & Trends",
+    "subtitle": "Visualisierung und Einnahmentrends",
+    "totalPaid": "Erhalten (bezahlt)",
+    "totalOwed": "Ausstehend",
+    "chartTitle": "Einnahmendynamik",
+    "loadError": "Diagramme konnten nicht geladen werden"
+}
+
+
+
+
 
 }

@@ -1,81 +1,97 @@
-from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
+from django.contrib.auth import  get_user_model
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.middleware.csrf import get_token
-from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 
-from .serializers import UserSerializer, UserCreateSerializer, UserUpdateSerializer, ChangePasswordSerializer
+from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser
+from rest_framework.exceptions import ValidationError
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .serializers import UserSerializer, UserCreateSerializer, UserUpdateSerializer
+from .serializers import ChangePasswordSerializer
+
 
 User = get_user_model()
 
-
 # ---- Auth: login / logout / current user ----
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def login_view(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
 
-    if not username or not password:
-        return Response(
-            {'detail': "Вкажіть ім'я користувача та пароль."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    def post(self, request):
+        # Заменяет @ensure_csrf_cookie: выдает свежий CSRF-токен в куки
+        get_token(request)
 
-    user = authenticate(request, username=username, password=password)
-    if user is None:
-        return Response(
-            {'detail': "Невірне ім'я користувача або пароль."},
-            status=status.HTTP_401_UNAUTHORIZED,
-        )
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-    login(request, user)
-    return Response({'id': user.id, 'username': user.username, 'is_staff': user.is_staff})
+        if not username or not password:
+            return Response(
+                {'detail': "Вкажіть ім'я користувача та пароль."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return Response(
+                {'detail': "Невірне ім'я користувача або пароль."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        login(request, user)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'is_staff': user.is_staff,
+        })
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def logout_view(request):
-    logout(request)
-    return Response(status=status.HTTP_204_NO_CONTENT)
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def me_view(request):
-    # Forces Django to set the csrftoken cookie on the response.
-    # Without this call, the cookie is never issued (nothing else in this
-    # API renders a template with {% csrf_token %}), so axios has nothing
-    # to read and every unsafe request fails with "CSRF token missing".
-    get_token(request)
+class MeView(APIView):
+    permission_classes = [AllowAny]
 
-    if not request.user.is_authenticated:
-        return Response({'id': None, 'username': None, 'is_staff': False})
-    return Response({
-        'id': request.user.id,
-        'username': request.user.username,
-        'is_staff': request.user.is_staff,
-    })
+    def get(self, request):
+        # Принудительно генерирует и отправляет csrf-токен в куки
+        get_token(request)
+
+        if not request.user.is_authenticated:
+            return Response({'id': None, 'username': None, 'is_staff': False})
+
+        return Response({
+            'id': request.user.id,
+            'username': request.user.username,
+            'is_staff': request.user.is_staff,
+        })
 
 
 # ---- Self-service password change (any authenticated user) ----
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def change_password_view(request):
-    serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
-    serializer.is_valid(raise_exception=True)
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    user = request.user
-    user.set_password(serializer.validated_data['new_password'])
-    user.save()
-    # keep the current session valid after the password hash changes
-    update_session_auth_hash(request, user)
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
 
-    return Response({'detail': 'Пароль оновлено.'})
+        user = request.user
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+
+        # Сохраняем сессию активной после смены хеша пароля
+        update_session_auth_hash(request, user)
+
+        return Response({'detail': 'Пароль оновлено.'})
 
 
 # ---- User management (staff only) ----

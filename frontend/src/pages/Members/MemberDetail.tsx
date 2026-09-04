@@ -29,9 +29,9 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/uk';
 import membersApi from "@/api/members.ts";
 import {Member} from "@/types/members.ts";
+import MemberPaymentsHistory from "@/pages/Payments/MemberPaymentsHistory"
 
 dayjs.extend(relativeTime);
-
 dayjs.locale('uk');
 
 
@@ -67,9 +67,9 @@ const MemberDetail = () => {
     return status === 'active' ? 'success' : 'error';
   };
 
-  const getStatusLabel = (status: string) => {
-    return status === 'active' ? 'Активний' : 'Неактивний';
-  };
+  // const getStatusLabel = (status: string) => {
+  //   return status === 'active' ? 'Активний' : 'Неактивний';
+  // };
 
   if (loading) {
     return (
@@ -144,7 +144,7 @@ const MemberDetail = () => {
                   {t('members.status')}
                 </Typography>
                 <Chip
-                  label={getStatusLabel(member.status)}
+                  label={member.status === 'active' ? t('members.statusActive') : t('members.statusInactive')}
                   color={getStatusColor(member.status)}
                   size="small"
                   sx={{ mt: 0.5 }}
@@ -270,12 +270,16 @@ const MemberDetail = () => {
                 >
                   {t('common.edit')}
                 </Button>
-                {/* Здесь можно добавить другие действия */}
+                {/* другие действия */}
               </Stack>
             </Paper>
           </Stack>
         </Grid>
+
       </Grid>
+
+      <MemberPaymentsHistory memberId={member.id} />
+
     </Box>
   );
 };

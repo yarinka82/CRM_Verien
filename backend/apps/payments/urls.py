@@ -1,11 +1,20 @@
 from django.urls import path
-from . import views
-
-app_name = 'payments'
+from .views import PaymentViewSet, FinancialOverviewView
 
 urlpatterns = [
-    # Добавьте свои URL-ы здесь
-    # Например:
-    # path('', views.payment_list, name='payment_list'),
-    # path('<int:pk>/', views.payment_detail, name='payment_detail'),
+    
+    path('', PaymentViewSet.as_view({
+        'get': 'list',
+        'post': 'create',
+    })),
+    path('<int:pk>/', PaymentViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy',
+    })),
+    
+    # Nested under the same 'api/payments/' prefix set in the main urls.py,
+    # so the real address is /api/payments/financial-overview/
+    path('financial-overview/', FinancialOverviewView.as_view()),
 ]
