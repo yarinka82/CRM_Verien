@@ -67,10 +67,7 @@ const MemberDetail = () => {
     return status === 'active' ? 'success' : 'error';
   };
 
-  // const getStatusLabel = (status: string) => {
-  //   return status === 'active' ? 'Активний' : 'Неактивний';
-  // };
-
+  
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>

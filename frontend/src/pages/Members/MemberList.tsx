@@ -43,6 +43,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 import { apiFetch } from "@/api/client.ts";
 import { tokens } from "@/pages/Members/components/theme.ts";
+import {toast} from "@/components/Notifier.tsx";
 
 interface Member {
   id: number;
@@ -119,108 +120,132 @@ const MemberList: React.FC = () => {
   // ---- 1. Экспорт в CSV (с поддержкой Excel UTF-8) ----
   const handleExportCSV = () => {
     setExportAnchorEl(null);
-    if (!filtered.length) return;
+    if (!filtered.length) {
+      toast.warning(t('members.exportEmpty', 'Немає даних для експорту'));
+      return;
+    }
 
-    const headers = [
-      t('members.fullName', 'ПІБ'),
-      t('members.email', 'Email'),
-      t('members.phone', 'Телефон'),
-      t('members.joinedDate', 'Дата вступу'),
-      t('members.status', 'Статус'),
-      t('members.isFounder', 'Засновник'),
-    ];
+    try {
+      const headers = [
+        t('members.fullName', 'ПІБ'),
+        t('members.email', 'Email'),
+        t('members.phone', 'Телефон'),
+        t('members.joinedDate', 'Дата вступу'),
+        t('members.status', 'Статус'),
+        t('members.isFounder', 'Засновник'),
+      ];
 
-    const rows = filtered.map((m) => [
-      `"${m.last_name} ${m.first_name}"`,
-      `"${m.email || ''}"`,
-      `"${m.phone || ''}"`,
-      `"${formatDate(m.join_date)}"`,
-      `"${m.status === 'active' ? t('members.statusActive', 'Активний') : t('members.statusInactive', 'Неактивний')}"`,
-      `"${m.is_founder ? t('common.yes', 'Так') : t('common.no', 'Ні')}"`,
-    ]);
+      const rows = filtered.map((m) => [
+        `"${m.last_name} ${m.first_name}"`,
+        `"${m.email || ''}"`,
+        `"${m.phone || ''}"`,
+        `"${formatDate(m.join_date)}"`,
+        `"${m.status === 'active' ? t('members.statusActive', 'Активний') : t('members.statusInactive', 'Неактивний')}"`,
+        `"${m.is_founder ? t('common.yes', 'Так') : t('common.no', 'Ні')}"`,
+      ]);
 
-    // Добавляем \uFEFF (Byte Order Mark), чтобы Excel корректно открывал кириллицу
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `members_${dayjs().format('YYYY-MM-DD')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `members_${dayjs().format('YYYY-MM-DD')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(t('members.exportCSVSuccess', 'CSV-файл завантажено'));
+    } catch (err) {
+      console.error('CSV export error:', err);
+      toast.error(t('members.exportError', 'Помилка експорту'));
+    }
   };
 
   // ---- 2. Экспорт в PDF (через окно печати с готовыми стилями) ----
-  const handleExportPDF = () => {
+   const handleExportPDF = () => {
     setExportAnchorEl(null);
-    if (!filtered.length) return;
-
+    if (!filtered.length) {
+      toast.warning(t('members.exportEmpty', 'Немає даних для експорту'));
+      return;
+    }
+  
     const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    if (!printWindow) {
+      toast.error(t('members.exportPopupBlocked', 'Браузер заблокував спливаюче вікно. Дозвольте спливаючі вікна для цього сайту.'));
+      return;
+    }
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${t('members.title', 'Члени організації')} - ${dayjs().format('DD.MM.YYYY')}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; color: #1a1a1a; }
-            h2 { margin-bottom: 5px; }
-            p { margin-top: 0; color: #666; font-size: 13px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-            th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
-            th { background-color: #f4f4f4; font-weight: bold; }
-            tr:nth-child(even) { background-color: #fafafa; }
-            .founder { font-weight: bold; color: #b8860b; }
-            @media print {
-              @page { size: landscape; margin: 10mm; }
-            }
-          </style>
-        </head>
-        <body>
-          <h2>${t('members.title', 'Список членів організації')}</h2>
-          <p>${t('members.totalRecords', { count: filtered.length })} | ${dayjs().format('DD.MM.YYYY HH:mm')}</p>
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>${t('members.fullName', 'ПІБ')}</th>
-                <th>${t('members.email', 'Email')}</th>
-                <th>${t('members.phone', 'Телефон')}</th>
-                <th>${t('members.joinedDate', 'Дата вступу')}</th>
-                <th>${t('members.status', 'Статус')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filtered
-                .map(
-                  (m, idx) => `
+    try {
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${t('members.title', 'Члени організації')} - ${dayjs().format('DD.MM.YYYY')}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; color: #1a1a1a; }
+              h2 { margin-bottom: 5px; }
+              p { margin-top: 0; color: #666; font-size: 13px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+              th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+              th { background-color: #f4f4f4; font-weight: bold; }
+              tr:nth-child(even) { background-color: #fafafa; }
+              .founder { font-weight: bold; color: #b8860b; }
+              @media print {
+                @page { size: landscape; margin: 10mm; }
+              }
+            </style>
+          </head>
+          <body>
+            <h2>${t('members.title', 'Список членів організації')}</h2>
+            <p>${t('members.totalRecords', { count: filtered.length })} | ${dayjs().format('DD.MM.YYYY HH:mm')}</p>
+            <table>
+              <thead>
                 <tr>
-                  <td>${idx + 1}</td>
-                  <td>${m.last_name} ${m.first_name} ${m.is_founder ? '<span class="founder">★</span>' : ''}</td>
-                  <td>${m.email || '—'}</td>
-                  <td>${m.phone || '—'}</td>
-                  <td>${formatDate(m.join_date)}</td>
-                  <td>${m.status === 'active' ? t('members.statusActive', 'Активний') : t('members.statusInactive', 'Неактивний')}</td>
+                  <th>#</th>
+                  <th>${t('members.fullName', 'ПІБ')}</th>
+                  <th>${t('members.email', 'Email')}</th>
+                  <th>${t('members.phone', 'Телефон')}</th>
+                  <th>${t('members.joinedDate', 'Дата вступу')}</th>
+                  <th>${t('members.status', 'Статус')}</th>
                 </tr>
-              `
-                )
-                .join('')}
-            </tbody>
-          </table>
-          <script>
-            window.onload = () => {
-              window.print();
-              window.onafterprint = () => window.close();
-            };
-          </script>
-        </body>
-      </html>
-    `;
+              </thead>
+              <tbody>
+                ${filtered
+                  .map(
+                    (m, idx) => `
+                  <tr>
+                    <td>${idx + 1}</td>
+                    <td>${m.last_name} ${m.first_name} ${m.is_founder ? '<span class="founder">★</span>' : ''}</td>
+                    <td>${m.email || '—'}</td>
+                    <td>${m.phone || '—'}</td>
+                    <td>${formatDate(m.join_date)}</td>
+                    <td>${m.status === 'active' ? t('members.statusActive', 'Активний') : t('members.statusInactive', 'Неактивний')}</td>
+                  </tr>
+                `
+                  )
+                  .join('')}
+              </tbody>
+            </table>
+            <script>
+              window.onload = () => {
+                window.print();
+                window.onafterprint = () => window.close();
+              };
+            </script>
+          </body>
+        </html>
+      `;
 
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+
+      toast.success(t('members.exportPDFSuccess', 'PDF відкрито для друку'));
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast.error(t('members.exportError', 'Помилка експорту'));
+      printWindow.close();
+    }
   };
 
   const handleDelete = async () => {
@@ -233,9 +258,12 @@ const MemberList: React.FC = () => {
         throw new Error(`HTTP ${res.status}`);
       }
       setMembers((prev) => prev.filter((m) => m.id !== deleteTarget.id));
+      toast.success(t('members.deleteSuccess', 'Члена видалено'));
       setDeleteTarget(null);
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : t('members.deleteError'));
+      const message = err instanceof Error ? err.message : t('members.deleteError');
+      setDeleteError(message);
+      toast.error(message);
     } finally {
       setDeleting(false);
     }

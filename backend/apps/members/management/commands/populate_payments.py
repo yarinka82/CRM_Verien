@@ -1,5 +1,4 @@
 """
-Файл: <app>/management/commands/populate_payments.py
 
 Наполняет таблицу Payment тестовыми данными.
 

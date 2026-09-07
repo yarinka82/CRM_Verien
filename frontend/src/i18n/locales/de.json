@@ -84,7 +84,10 @@
     "loadError": "Fehler beim Laden der Liste: {{error}}",
     "emptyTitle": "Noch leer",
     "emptyDescription": "Fügen Sie das erste Mitglied hinzu, um das Verzeichnis zu starten.",
-    "founderTooltip": "Gründer des Vereins"
+    "founderTooltip": "Gründer des Vereins",
+    "updateSuccess": "Mitglied aktualisiert",
+    "createSuccess": "Mitglied erstellt",
+    "saveError": "Fehler beim Speichern"
   },
   "settings": {
     "title": "Einstellungen",
