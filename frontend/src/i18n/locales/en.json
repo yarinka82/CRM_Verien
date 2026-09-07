@@ -84,7 +84,10 @@
     "loadError": "Failed to load list: {{error}}",
     "emptyTitle": "It's empty here",
     "emptyDescription": "Add the first member to start the registry.",
-    "founderTooltip": "Association Founder"
+    "founderTooltip": "Association Founder",
+    "updateSuccess": "Member updated",
+    "createSuccess": "Member created",
+    "saveError": "Save error"
   },
   "settings": {
     "title": "Settings",

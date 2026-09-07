@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/components/Notifier';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
@@ -87,12 +88,16 @@ const MemberForm = () => {
     try {
       if (isEdit && id) {
         await updateMember(parseInt(id), formData);
+        toast.success(t('members.updateSuccess'));
       } else {
         await createMember(formData);
+        toast.success(t('members.createSuccess'));
       }
       navigate('/members');
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Помилка збереження');
+      const message = error.response?.data?.error || t('members.saveError');
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
