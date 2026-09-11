@@ -127,8 +127,9 @@
     "cannotEditSelfRole": "Cannot edit your own role"
   },
   "login": {
-    "brandTitle": "Association Registry",
-    "brandSubtitle": "Members, contributions and revenues in one place.",
+    "brandTitle": "HUB IT",
+    "brandSubtitle": "Digital I Hub Würzburg e.V.",
+    "brandSubtitle2": "",
     "title": "Login",
     "subtitle": "Log in to continue working with the registry.",
     "usernameLabel": "Username",

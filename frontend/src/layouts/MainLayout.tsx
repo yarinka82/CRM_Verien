@@ -6,6 +6,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import Sidebar from '../components/Sidebar';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useAuth } from '../hooks/useAuth';
+import { tokens } from '@/pages/Members/components/theme.ts';
 
 const MainLayout: React.FC = () => {
   const { user, logout } = useAuth();
@@ -17,7 +18,7 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5' }}>
+    <Box sx={{ display: 'flex', height: '100vh', bgcolor: tokens.paper }}>
       {/* Sidebar */}
       <Sidebar />
 
@@ -27,17 +28,19 @@ const MainLayout: React.FC = () => {
         <AppBar
           position="static"
           color="default"
-          elevation={1}
+          elevation={0}
           sx={{
-            bgcolor: 'background.paper',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            bgcolor: tokens.ink,
+            borderBottom: `2px solid ${tokens.registry}`,
             flexShrink: 0,
           }}
         >
           <Toolbar sx={{ gap: 1 }}>
-            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
-              CRM Verien
+            <Typography
+              variant="h6"
+              sx={{ flexGrow: 1, fontWeight: 800, color: tokens.paperElevated, letterSpacing: '0.02em' }}
+            >
+              Hub IT
             </Typography>
 
             {/* Language Switcher */}
@@ -49,7 +52,10 @@ const MainLayout: React.FC = () => {
                 size="small"
                 onClick={handleLogout}
                 startIcon={<LogoutIcon fontSize="small" />}
-                sx={{ color: 'text.secondary' }}
+                sx={{
+                  color: tokens.cyan,
+                  '&:hover': { color: tokens.paperElevated, bgcolor: 'rgba(41,171,226,0.1)' },
+                }}
               >
                 {user.username}
               </Button>

@@ -47,7 +47,7 @@ interface AppUser {
   date_joined: string;
 }
 
-// ---- Компонент для поля пароля з глазиком ----
+// ---- Компонент для поля пароля ----
 const PasswordField: React.FC<{
   label: string;
   value: string;
@@ -281,21 +281,29 @@ const UserManagementSection: React.FC = () => {
                     {u.email || '—'}
                   </TableCell>
                   <TableCell>
-                    {u.is_staff ? (
-                      <Chip label={t('settings.admin')} size="small" sx={{ bgcolor: 'rgba(184,134,59,0.15)', color: tokens.sealGold }} />
-                    ) : (
-                      <Chip label={t('settings.user')} size="small" sx={{ bgcolor: 'rgba(154,165,160,0.15)', color: tokens.muted }} />
-                    )}
+                  {u.is_staff ? (
+                    <Chip
+                      label={t('settings.admin')}
+                      size="small"
+                      sx={{ bgcolor: 'rgba(28,157,242,0.12)', color: tokens.registryDark }}
+                    />
+                  ) : (
+                    <Chip
+                      label={t('settings.user')}
+                      size="small"
+                      sx={{ bgcolor: 'rgba(138,148,166,0.15)', color: tokens.muted }}
+                    />
+                  )}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={u.is_active ? t('settings.active') : t('settings.inactive')}
-                      size="small"
-                      sx={{
-                        bgcolor: u.is_active ? 'rgba(47,111,94,0.12)' : 'rgba(164,74,63,0.12)',
-                        color: u.is_active ? tokens.registryDark : tokens.danger,
-                      }}
-                    />
+                  <Chip
+                    label={u.is_active ? t('settings.active') : t('settings.inactive')}
+                    size="small"
+                    sx={{
+                      bgcolor: u.is_active ? 'rgba(28,157,242,0.12)' : 'rgba(214,69,61,0.12)',
+                      color: u.is_active ? tokens.registryDark : tokens.danger,
+                    }}
+                  />
                   </TableCell>
                   <TableCell align="right">
                     <Tooltip title={t('settings.edit')}>
@@ -549,7 +557,7 @@ const DeleteUserDialog: React.FC<{
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
-    console.log('handleDelete called, user =', user);
+
     if (!user) return;
     setDeleting(true);
     setError(null);
