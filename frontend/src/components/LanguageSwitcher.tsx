@@ -2,6 +2,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ButtonGroup, Button } from '@mui/material';
+import { tokens } from '@/pages/Members/components/theme.ts';
 
 const languages = [
   { code: 'uk', label: 'УКР' },
@@ -26,7 +27,7 @@ const LanguageSwitcher: React.FC = () => {
         borderRadius: '8px',
         overflow: 'hidden',
         '& .MuiButtonGroup-grouped': {
-          borderColor: 'divider',
+          borderColor: tokens.cyan,
         },
       }}
     >
@@ -44,10 +45,10 @@ const LanguageSwitcher: React.FC = () => {
               fontSize: '0.75rem',
               fontWeight: 600,
               letterSpacing: '0.04em',
-              color: active ? 'primary.contrastText' : 'text.secondary',
-              bgcolor: active ? 'primary.main' : 'transparent',
+              color: active ? '#FFFFFF' : tokens.cyan,
+              bgcolor: active ? tokens.registry : 'transparent',
               '&:hover': {
-                bgcolor: active ? 'primary.dark' : 'rgba(47, 111, 94, 0.08)',
+                bgcolor: active ? tokens.registryDark : 'rgba(41, 171, 226, 0.12)',
               },
             }}
           >
