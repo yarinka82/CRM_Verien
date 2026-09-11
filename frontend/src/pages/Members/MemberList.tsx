@@ -190,7 +190,8 @@ const MemberList: React.FC = () => {
               th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
               th { background-color: #f4f4f4; font-weight: bold; }
               tr:nth-child(even) { background-color: #fafafa; }
-              .founder { font-weight: bold; color: #b8860b; }
+              
+              .founder { font-weight: bold; color: ${tokens.registry}; }
               @media print {
                 @page { size: landscape; margin: 10mm; }
               }
@@ -305,7 +306,11 @@ const MemberList: React.FC = () => {
             startIcon={<FileDownloadIcon />}
             onClick={(e) => setExportAnchorEl(e.currentTarget)}
             disabled={filtered.length === 0}
-            sx={{ borderColor: tokens.divider, color: tokens.ink }}
+            sx={{
+              borderColor: tokens.divider,
+              color: tokens.ink,
+              '&:hover': { borderColor: tokens.registry, bgcolor: 'rgba(28,157,242,0.06)' },
+            }}
           >
             {t('common.export', 'Експорт')}
           </Button>
@@ -474,9 +479,7 @@ const MemberList: React.FC = () => {
                       {m.last_name} {m.first_name}
                       {m.is_founder && (
                         <Tooltip title={t('members.founderTooltip')}>
-                          <VerifiedIcon
-                            sx={{ fontSize: 18, color: tokens.sealGold }}
-                          />
+                          <VerifiedIcon sx={{ fontSize: 18, color: tokens.cyan }} />
                         </Tooltip>
                       )}
                     </Box>
@@ -491,17 +494,19 @@ const MemberList: React.FC = () => {
                     {formatDate(m.join_date)}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={m.status === 'active' ? t('members.statusActive') : t('members.statusInactive')}
-                      size="small"
-                      sx={{
-                        bgcolor: m.status === 'active' ? 'rgba(47,111,94,0.12)' : 'rgba(154,165,160,0.15)',
-                        color: m.status === 'active' ? tokens.registryDark : tokens.muted,
-                        fontWeight: 500,
-                        border: '1px solid',
-                        borderColor: m.status === 'active' ? tokens.registry : tokens.divider,
-                      }}
-                    />
+
+                  <Chip
+                    label={m.status === 'active' ? t('members.statusActive') : t('members.statusInactive')}
+                    size="small"
+                    sx={{
+                      bgcolor: m.status === 'active' ? 'rgba(28,157,242,0.12)' : 'rgba(138,148,166,0.15)',
+                      color: m.status === 'active' ? tokens.registryDark : tokens.muted,
+                      fontWeight: 500,
+                      border: '1px solid',
+                      borderColor: m.status === 'active' ? tokens.registry : tokens.divider,
+                    }}
+                  />
+
                   </TableCell>
                   <TableCell align="right">
                     <Tooltip title={t('members.delete')}>

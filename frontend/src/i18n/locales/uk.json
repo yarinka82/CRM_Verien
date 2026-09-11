@@ -127,8 +127,9 @@
     "cannotEditSelfRole": "Не можна змінювати роль самого себе"
   },
   "login": {
-    "brandTitle": "Реєстр об'єднання",
-    "brandSubtitle": "Члени, внески та надходження — в одному місці.",
+    "brandTitle": "HUB IT",
+    "brandSubtitle": "Digital I Hub Würzburg e.V.",
+    "brandSubtitle2": "",
     "title": "Вхід",
     "subtitle": "Увійдіть, щоб продовжити роботу з реєстром.",
     "usernameLabel": "Ім'я користувача",

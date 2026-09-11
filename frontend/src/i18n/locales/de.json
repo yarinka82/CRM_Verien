@@ -127,8 +127,9 @@
     "cannotEditSelfRole": "Sie können Ihre eigene Rolle nicht ändern"
   },
   "login": {
-    "brandTitle": "Vereinsregister",
-    "brandSubtitle": "Mitglieder, Beiträge und Einnahmen an einem Ort.",
+    "brandTitle": "HUB IT",
+    "brandSubtitle": "Digital I Hub Würzburg e.V.",
+    "brandSubtitle2": "",
     "title": "Anmelden",
     "subtitle": "Melden Sie sich an, um mit dem Register zu arbeiten.",
     "usernameLabel": "Benutzername",
