@@ -1,19 +1,19 @@
 import { createTheme } from '@mui/material/styles';
 
-// Verein Registry theme — ink/registry-blue/seal-gold palette
-// Evokes an official association ledger with a Ukrainian civic accent,
-// not a generic SaaS dashboard.
+// Hub IT theme — navy/cyan-blue palette, geometric sans.
+// Matches the Digital I Hub Würzburg e.V. logo: dark navy background,
+// single bright accent blue, no gold, no serif.
 
 export const tokens = {
-  ink: '#16233B',
-  paper: '#EDEFEA',
-  paperElevated: '#F7F8F5',
-  registry: '#0057B7',
-  registryDark: '#003D82',
-  sealGold: '#FFC72C',
-  muted: '#9AA5A0',
-  divider: '#D8DCD4',
-  danger: '#A44A3F',
+  ink: '#011226',
+  registry: '#1C9DF2',
+  registryDark: '#1580CC',
+  cyan: '#29ABE2',
+  paper: '#F7F9FC',
+  paperElevated: '#FFFFFF',
+  muted: '#8A94A6',
+  divider: '#E1E5EC',
+  danger: '#D6453D',
 };
 
 const theme = createTheme({
@@ -25,11 +25,7 @@ const theme = createTheme({
     primary: {
       main: tokens.registry,
       dark: tokens.registryDark,
-      contrastText: '#F7F8F5',
-    },
-    secondary: {
-      main: tokens.sealGold,
-      contrastText: '#16233B',
+      contrastText: '#FFFFFF',
     },
     text: {
       primary: tokens.ink,
@@ -42,22 +38,22 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: '"Inter", "Helvetica Neue", sans-serif',
-    h1: { fontFamily: '"Fraunces", serif', fontWeight: 600 },
-    h2: { fontFamily: '"Fraunces", serif', fontWeight: 600 },
-    h3: { fontFamily: '"Fraunces", serif', fontWeight: 600 },
-    h4: { fontFamily: '"Fraunces", serif', fontWeight: 600, letterSpacing: '-0.01em' },
-    h5: { fontFamily: '"Fraunces", serif', fontWeight: 600 },
-    h6: { fontFamily: '"Fraunces", serif', fontWeight: 600 },
+    h1: { fontFamily: '"Inter", sans-serif', fontWeight: 800, letterSpacing: '-0.01em' },
+    h2: { fontFamily: '"Inter", sans-serif', fontWeight: 800, letterSpacing: '-0.01em' },
+    h3: { fontFamily: '"Inter", sans-serif', fontWeight: 700 },
+    h4: { fontFamily: '"Inter", sans-serif', fontWeight: 700 },
+    h5: { fontFamily: '"Inter", sans-serif', fontWeight: 700, letterSpacing: '0.02em' },
+    h6: { fontFamily: '"Inter", sans-serif', fontWeight: 700 },
   },
   shape: {
-    borderRadius: 6,
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: 'none',
-          fontWeight: 500,
+          fontWeight: 600,
         },
       },
     },
