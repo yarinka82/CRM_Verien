@@ -10,6 +10,9 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
+# Prefer IPv4 over IPv6
+RUN printf 'precedence ::ffff:0:0/96  100\n' >> /etc/gai.conf
+
 COPY backend/ .
 
 EXPOSE 8000
