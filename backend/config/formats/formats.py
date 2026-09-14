@@ -1,6 +1,6 @@
 
 # Overrides Django's built-in Ukrainian date formats, which default to
-# something like "2 березня 2026 р." — not what we want for a registry.
+# something like "March 2, 2026" — not what we want for a registry.
 #
 # This affects: admin list_display columns, admin form widgets (both
 # display and what the user can type in), and any {{ date|date }} template

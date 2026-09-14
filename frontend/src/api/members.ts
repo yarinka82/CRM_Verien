@@ -4,7 +4,7 @@ import { Member, MemberFormData, MemberFilters, MemberListResponse } from '../ty
 const API_BASE = '/api/members';
 
 export const membersApi = {
-  // Получить список членов с фильтрацией
+  // Get a list of filtered members
   getMembers: async (filters?: MemberFilters): Promise<MemberListResponse> => {
     const params = new URLSearchParams();
 
@@ -23,25 +23,25 @@ export const membersApi = {
     return response.data;
   },
 
-  // Получить члена по ID
+  // Get a member by ID
   getMember: async (id: number): Promise<Member> => {
     const response = await axios.get(`${API_BASE}/${id}/`, { withCredentials: true });
     return response.data;
   },
 
-  // Создать нового члена
+  // Create new member
   createMember: async (data: MemberFormData): Promise<Member> => {
     const response = await axios.post(`${API_BASE}/`, data, { withCredentials: true });
     return response.data;
   },
 
-  // Обновить члена
+  // Update Member
   updateMember: async (id: number, data: Partial<MemberFormData>): Promise<Member> => {
     const response = await axios.patch(`${API_BASE}/${id}/`, data, { withCredentials: true });
     return response.data;
   },
 
-  // Удалить члена
+  // Delete Member
   deleteMember: async (id: number): Promise<void> => {
     await axios.delete(`${API_BASE}/${id}/`, { withCredentials: true });
   },

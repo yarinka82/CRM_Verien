@@ -9,6 +9,7 @@ export interface Member {
   birth_date: string | null;
   address: string;
   join_date: string;
+  payer_type: 'individual' | 'company';
   status: 'active' | 'inactive';
   is_founder: boolean;
   notes: string;
@@ -25,6 +26,7 @@ export interface MemberFormData {
   address: string;
   join_date: string;
   status: 'active' | 'inactive';
+  payer_type: 'individual' | 'company';
   is_founder: boolean;
   notes: string;
 }

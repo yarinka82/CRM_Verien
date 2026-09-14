@@ -74,7 +74,7 @@ const MemberList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [query, setQuery] = useState('');
 
-  // Меню экспорта
+  // Export Menu
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
@@ -117,7 +117,7 @@ const MemberList: React.FC = () => {
       });
   }, [members, founderFilter, statusFilter, query, sortOrder]);
 
-  // ---- 1. Экспорт в CSV (с поддержкой Excel UTF-8) ----
+  // ---- 1. Export to CSV (Excel-enabled UTF-8) ----
   const handleExportCSV = () => {
     setExportAnchorEl(null);
     if (!filtered.length) {
@@ -162,7 +162,7 @@ const MemberList: React.FC = () => {
     }
   };
 
-  // ---- 2. Экспорт в PDF (через окно печати с готовыми стилями) ----
+  // ---- 2. Export to PDF (via print window with ready styles) ----
    const handleExportPDF = () => {
     setExportAnchorEl(null);
     if (!filtered.length) {
@@ -299,7 +299,7 @@ const MemberList: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Кнопки действий: Экспорт + Добавить */}
+        {/*Action Buttons: Export + Add*/}
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
           <Button
             variant="outlined"
@@ -315,7 +315,7 @@ const MemberList: React.FC = () => {
             {t('common.export', 'Експорт')}
           </Button>
 
-          {/* Меню выбора формата экспорта */}
+          {/*Export Format Selection Menu*/}
           <Menu
             anchorEl={exportAnchorEl}
             open={Boolean(exportAnchorEl)}

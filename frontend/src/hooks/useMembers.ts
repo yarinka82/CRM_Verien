@@ -15,7 +15,7 @@ export const useMembers = () => {
     setLoading(true);
     try {
       const response = await membersApi.getMembers(filters);
-      // Исправлено: используем response.results, а не response напрямую
+      // Fixed: we use response.results, not response directly
       setMembers(response.results || []);
       setTotal(response.count || 0);
     } catch (error) {

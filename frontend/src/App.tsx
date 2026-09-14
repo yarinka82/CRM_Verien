@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AuthProvider } from './context/AuthContext';
 import { MainLayout } from './layouts';
 import Notifier from '@/components/Notifier';
-import { Home, Login, MemberList, MemberDetail, MemberForm, Settings, FinanceOverview, FinanceChartsPage, CashDeskPage } from './pages';
+import { Home, Login, MemberList, MemberDetail, MemberForm, Settings, FinanceOverview, CashDeskPage, DocumentsPage } from './pages';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -22,10 +22,10 @@ function App() {
         <>
         <Notifier />
           <Routes>
-            {/* Публичные маршруты */}
+            {/*Public routes*/}
             <Route path="/login" element={<Login />} />
 
-            {/* Защищенные маршруты */}
+            {/*Protected routes*/}
             <Route
               path="/"
               element={
@@ -42,7 +42,7 @@ function App() {
               <Route path="members/:id/edit" element={<MemberForm />} />
               <Route path="cashdesk" element={<CashDeskPage />} />
               <Route path="finance" element={<FinanceOverview />} />
-              <Route path="charts" element={<FinanceChartsPage />} />
+              <Route path="documents" element={<DocumentsPage />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>

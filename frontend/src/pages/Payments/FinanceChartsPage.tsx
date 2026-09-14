@@ -18,23 +18,19 @@ interface DateRange {
   date_to: string;
 }
 
+type ChartMode = 'month' | 'quarter';
+
 function SummaryCard({
   label,
   value,
-  tone,
 }: {
   label: string;
   value: string;
-  tone?: 'default' | 'warning';
 }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <div className="text-sm text-gray-500">{label}</div>
-      <div
-        className={`mt-1 text-2xl font-semibold ${
-          tone === 'warning' ? 'text-amber-600' : 'text-gray-900'
-        }`}
-      >
+      <div className="mt-1 text-2xl font-semibold text-gray-900">
         {value}
       </div>
     </div>
@@ -48,8 +44,8 @@ export default function FinancialOverviewPage() {
   const [overview, setOverview] = useState<FinancialOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chartMode, setChartMode] = useState<ChartMode>('month');
 
-  // Динамический формат валюты под выбранный язык
   const formatAmount = useCallback(
     (value: number) => {
       const locale =
@@ -85,9 +81,15 @@ export default function FinancialOverviewPage() {
     load();
   }, [load]);
 
+  const chartData = overview
+    ? chartMode === 'month'
+      ? overview.by_period
+      : overview.by_period_quarterly
+    : [];
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-      {/* Шапка и фильтры по дате */}
+      {/*Header & Date Filters*/}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="text-xl font-semibold text-gray-900">
           {t('financeOverview.title', 'Фінансовий огляд')}
@@ -125,27 +127,60 @@ export default function FinancialOverviewPage() {
         </div>
       ) : overview ? (
         <>
-          {/* Картки зведення */}
+          {/*Summary cards*/}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryCard
-              label={t('financeOverview.totalPaid', 'Отримано (оплачено)')}
+              label={t('financeOverview.totalIncomes', 'Всього отримано')}
               value={formatAmount(overview.total)}
             />
             <SummaryCard
-              label={t('financeOverview.totalOwed', 'Заборгованість')}
-              value={formatAmount(overview.owed_total)}
-              tone="warning"
+              label={t('financeOverview.payerBreakdown', 'Фіз. особи / Підприємства')}
+              value={`${formatAmount(
+                overview.payer_breakdown.find((p) => p.payer_type === 'individual')?.total || 0
+              )} / ${formatAmount(
+                overview.payer_breakdown.find((p) => p.payer_type === 'company')?.total || 0
+              )}`}
             />
           </div>
 
-          {/* Графік динаміки по місяцях */}
+          {/*Chart of dynamics by months/quarters*/}
           <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 className="mb-4 text-sm font-medium text-gray-700">
-              {t('financeOverview.monthlyDynamics', 'Динаміка по місяцях')}
-            </h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-medium text-gray-700">
+                {chartMode === 'month'
+                  ? t('financeOverview.monthlyDynamics', 'Динаміка по місяцях')
+                  : t('financeOverview.quarterlyDynamics', 'Динаміка по кварталах')}
+              </h2>
+
+              <div className="inline-flex rounded-md border border-gray-200 text-sm">
+                <button
+                  type="button"
+                  onClick={() => setChartMode('month')}
+                  className={`px-3 py-1 rounded-l-md ${
+                    chartMode === 'month'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('financeOverview.modes.month', 'Місяць')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChartMode('quarter')}
+                  className={`px-3 py-1 rounded-r-md border-l border-gray-200 ${
+                    chartMode === 'quarter'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('financeOverview.modes.quarter', 'Квартал')}
+                </button>
+              </div>
+            </div>
+
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
-                <LineChart data={overview.by_period}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="period" />
                   <YAxis />
@@ -156,15 +191,8 @@ export default function FinancialOverviewPage() {
                   <Line
                     type="monotone"
                     dataKey="total"
-                    name={t('payments.statuses.paid', 'Оплачено')}
+                    name={t('financeOverview.totalCol', 'Всього')}
                     stroke="#2563eb"
-                    strokeWidth={2}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="owed"
-                    name={t('payments.statuses.owed', 'Заборговано')}
-                    stroke="#d97706"
                     strokeWidth={2}
                   />
                 </LineChart>
@@ -172,7 +200,7 @@ export default function FinancialOverviewPage() {
             </div>
           </div>
 
-          {/* Таблиця розбивки по типах */}
+          {/*Breakdown table by type*/}
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-50">
@@ -181,10 +209,7 @@ export default function FinancialOverviewPage() {
                     {t('payments.fields.type', 'Тип')}
                   </th>
                   <th className="px-4 py-2 text-right font-medium text-gray-600">
-                    {t('payments.statuses.paid', 'Оплачено')}
-                  </th>
-                  <th className="px-4 py-2 text-right font-medium text-gray-600">
-                    {t('payments.statuses.owed', 'Заборговано')}
+                    {t('financeOverview.totalCol', 'Всього')}
                   </th>
                 </tr>
               </thead>
@@ -197,8 +222,33 @@ export default function FinancialOverviewPage() {
                     <td className="px-4 py-2 text-right font-medium text-gray-800">
                       {formatAmount(row.total)}
                     </td>
-                    <td className="px-4 py-2 text-right font-medium text-amber-700">
-                      {formatAmount(row.owed)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/*Breakdown table by payer type*/}
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 text-left font-medium text-gray-600">
+                    {t('payments.fields.payerType', 'Платник')}
+                  </th>
+                  <th className="px-4 py-2 text-right font-medium text-gray-600">
+                    {t('financeOverview.totalCol', 'Всього')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {overview.payer_breakdown.map((row) => (
+                  <tr key={row.payer_type}>
+                    <td className="px-4 py-2 text-gray-800">
+                      {t(`payments.payerTypes.${row.payer_type}`, row.payer_type_display)}
+                    </td>
+                    <td className="px-4 py-2 text-right font-medium text-gray-800">
+                      {formatAmount(row.total)}
                     </td>
                   </tr>
                 ))}

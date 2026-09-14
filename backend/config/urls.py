@@ -6,11 +6,11 @@ urlpatterns = [
     path('', home_view),
     path('admin/', admin.site.urls),
     
-    # Server-rendered HTML pages
     path('members/', include('apps.members.urls')),
     
     # JSON API
-    path('api/', include('apps.users.urls')),  # /api/auth/..., /api/users/...
+    path('api/', include('apps.users.urls')),
     path('api/members/', include('apps.members.api_urls')),
     path('api/payments/', include('apps.payments.urls')),
+    path('api/', include('apps.documents.urls')),
 ]

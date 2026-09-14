@@ -12,11 +12,9 @@ except ImportError:
 
 if HAS_PAYMENTS:
     class PaymentInline(admin.TabularInline):
-        """
-        Shows this member's payment history right on their admin page —
-        the "картка члена з історією платежів" from the original spec,
-        available for free inside the admin.
-        """
+        """Shows this member's payment history right on their admin page —
+        the "member card with payment history" from the original spec,
+        available for free inside the admin."""
         model = Payment
         extra = 0
         fields = ('date', 'type', 'amount', 'status', 'period', 'comment')
@@ -98,9 +96,9 @@ class MemberAdmin(admin.ModelAdmin):
     if HAS_PAYMENTS:
         @admin.register(Payment)
         class PaymentAdmin(admin.ModelAdmin):
-            list_display = ('date', 'type', 'member', 'source_name', 'amount', 'status', 'period')
-            list_filter = ('type', 'status', 'date')
-            search_fields = ('member__last_name', 'member__first_name', 'source_name', 'comment')
+            list_display = ('id', 'member', 'type', 'payer_type', 'amount', 'date', 'source_name')
+            list_filter = ('type', 'payer_type', 'date')
+            search_fields = ('member__first_name', 'member__last_name', 'source_name', 'comment')
             date_hierarchy = 'date'
             ordering = ('-date',)
             autocomplete_fields = ('member',)

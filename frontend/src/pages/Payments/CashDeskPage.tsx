@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -28,8 +29,6 @@ import {
   Grid,
   Autocomplete,
   Tooltip,
-  ToggleButton,
-  ToggleButtonGroup,
   Menu,
   ListItemIcon,
   ListItemText,
@@ -45,7 +44,7 @@ import {
   PictureAsPdf as PictureAsPdfIcon,
   AccountBalanceWallet as WalletIcon,
   TrendingUp as TrendingUpIcon,
-  WarningAmber as WarningIcon,
+  Groups as GroupsIcon,
 } from '@mui/icons-material';
 import dayjs, { Dayjs } from 'dayjs';
 
@@ -56,9 +55,9 @@ import {
   Payment,
   PaymentFormData,
   PaymentType,
-  PaymentStatus,
+  PayerType,
   PAYMENT_TYPE_LABELS,
-  PAYMENT_STATUS_LABELS,
+  PAYER_TYPE_LABELS,
 } from '@/types/payments';
 
 interface MemberShort {
@@ -78,39 +77,34 @@ const emptyUniversalForm = (): CashDeskFormData => ({
   amount: '',
   date: dayjs().format('YYYY-MM-DD'),
   type: 'membership_fee',
+  payer_type: 'individual',
   source_name: '',
   period: `${dayjs().year()}`,
-  status: 'paid',
   comment: '',
 });
 
 export const CashDeskPage: React.FC = () => {
   const { t } = useTranslation();
 
-  // Данные платежей и участников
   const [payments, setPayments] = useState<Payment[]>([]);
   const [members, setMembers] = useState<MemberShort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Фильтры
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [payerTypeFilter, setPayerTypeFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Модалка добавления / редактирования
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<CashDeskFormData>(emptyUniversalForm());
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Модалка подтверждения удаления
   const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Меню экспорта
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
@@ -121,11 +115,9 @@ export const CashDeskPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Загружаем все платежи
       const paymentsData = await paymentsApi.getPayments();
       setPayments(paymentsData);
 
-      // 2. Загружаем список членов для выпадающего списка
       const res = await apiFetch('/api/members/');
       if (res.ok) {
         const membersData = await res.json();
@@ -141,11 +133,10 @@ export const CashDeskPage: React.FC = () => {
     }
   };
 
-  // Фильтрация и сортировка
   const filteredPayments = useMemo(() => {
     return payments
       .filter((p) => (typeFilter === 'all' ? true : p.type === typeFilter))
-      .filter((p) => (statusFilter === 'all' ? true : p.status === statusFilter))
+      .filter((p) => (payerTypeFilter === 'all' ? true : p.payer_type === payerTypeFilter))
       .filter((p) => {
         if (!searchQuery.trim()) return true;
         const q = searchQuery.toLowerCase();
@@ -161,21 +152,20 @@ export const CashDeskPage: React.FC = () => {
         const diff = dayjs(a.date).valueOf() - dayjs(b.date).valueOf();
         return sortOrder === 'asc' ? diff : -diff;
       });
-  }, [payments, typeFilter, statusFilter, searchQuery, sortOrder]);
+  }, [payments, typeFilter, payerTypeFilter, searchQuery, sortOrder]);
 
-  // Сводные KPI
   const stats = useMemo(() => {
-    const paidTotal = payments
-      .filter((p) => p.status === 'paid')
+    const total = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const individualTotal = payments
+      .filter((p) => p.payer_type === 'individual')
       .reduce((sum, p) => sum + Number(p.amount), 0);
-    const owedTotal = payments
-      .filter((p) => p.status === 'owed')
+    const companyTotal = payments
+      .filter((p) => p.payer_type === 'company')
       .reduce((sum, p) => sum + Number(p.amount), 0);
     const count = payments.length;
-    return { paidTotal, owedTotal, count };
+    return { total, individualTotal, companyTotal, count };
   }, [payments]);
 
-  // Открытие модалки создания
   const handleOpenCreate = () => {
     setEditingId(null);
     setForm(emptyUniversalForm());
@@ -183,7 +173,6 @@ export const CashDeskPage: React.FC = () => {
     setDialogOpen(true);
   };
 
-  // Открытие модалки редактирования
   const handleOpenEdit = (payment: Payment) => {
     setEditingId(payment.id);
     const memberObj = payment.member
@@ -196,18 +185,16 @@ export const CashDeskPage: React.FC = () => {
       amount: String(payment.amount),
       date: payment.date,
       type: payment.type,
+      payer_type: payment.payer_type,
       source_name: payment.source_name || '',
       period: payment.period || '',
-      status: payment.status,
       comment: payment.comment || '',
     });
     setFormError(null);
     setDialogOpen(true);
   };
 
-  // Сохранение (Создание / Редактирование)
   const handleSave = async () => {
-    // 1. Валидация суммы
     if (!form.amount || Number(form.amount) <= 0) {
       const msg = t('payments.validation.amountRequired', 'Вкажіть суму більше нуля');
       setFormError(msg);
@@ -215,7 +202,6 @@ export const CashDeskPage: React.FC = () => {
       return;
     }
 
-    // 2. Валидация члена организации
     if (form.type === 'membership_fee' && !form.member) {
       const msg = t('cashDesk.validation.memberRequired', 'Оберіть члена організації для членського внеску');
       setFormError(msg);
@@ -223,7 +209,6 @@ export const CashDeskPage: React.FC = () => {
       return;
     }
 
-    // 3. Валидация источника для пожертвований/грантов
     if (form.type !== 'membership_fee' && !form.source_name.trim()) {
       const msg = t('cashDesk.validation.sourceRequired', 'Вкажіть назву джерела / організації / фонду');
       setFormError(msg);
@@ -238,11 +223,11 @@ export const CashDeskPage: React.FC = () => {
       amount: form.amount,
       date: form.date,
       type: form.type,
-      status: form.status,
+      payer_type: form.payer_type,
       comment: form.comment || '',
       member: form.type === 'membership_fee' ? form.member : null,
       source_name: form.type !== 'membership_fee' ? form.source_name : '',
-      period: form.type === 'membership_fee' ? form.period || '' : '',
+      period: form.period || '',
     };
 
     try {
@@ -271,7 +256,6 @@ export const CashDeskPage: React.FC = () => {
     }
   };
 
-  // Удаление через модальное окно
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -288,7 +272,6 @@ export const CashDeskPage: React.FC = () => {
     }
   };
 
-  // Экспорт CSV
   const exportCSV = () => {
     setExportAnchorEl(null);
     if (!filteredPayments.length) return;
@@ -298,9 +281,9 @@ export const CashDeskPage: React.FC = () => {
         t('payments.fields.date', 'Дата'),
         t('payments.fields.type', 'Тип'),
         t('cashDesk.payerOrSource', 'Платник / Джерело'),
+        t('payments.fields.payerType', 'Тип платника'),
         t('payments.fields.period', 'Період'),
         t('payments.fields.amount', 'Сума (€)'),
-        t('payments.fields.status', 'Статус'),
         t('payments.fields.comment', 'Коментар'),
       ];
 
@@ -308,9 +291,9 @@ export const CashDeskPage: React.FC = () => {
         `"${p.date}"`,
         `"${t(`payments.types.${p.type}`, p.type)}"`,
         `"${p.member_name || p.source_name || '—'}"`,
+        `"${t(`payments.payerTypes.${p.payer_type}`, p.payer_type)}"`,
         `"${p.period || '—'}"`,
         `"${p.amount}"`,
-        `"${t(`payments.statuses.${p.status}`, p.status)}"`,
         `"${(p.comment || '').replace(/"/g, '""')}"`,
       ]);
 
@@ -323,6 +306,7 @@ export const CashDeskPage: React.FC = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
       toast.success(t('common.exportSuccess', 'Файл CSV успішно завантажено'));
     } catch {
@@ -330,7 +314,6 @@ export const CashDeskPage: React.FC = () => {
     }
   };
 
-  // Экспорт PDF
   const exportPDF = () => {
     setExportAnchorEl(null);
     if (!filteredPayments.length) return;
@@ -359,16 +342,16 @@ export const CashDeskPage: React.FC = () => {
         </head>
         <body>
           <h2>${t('cashDesk.title', 'Каса та журнал надходжень')}</h2>
-          <div class="meta">${t('common.total', 'Всього записів')}: ${filteredPayments.length} | ${t('payments.summary.totalPaid', 'Оплачено')}: ${stats.paidTotal.toFixed(2)} € | ${dayjs().format('DD.MM.YYYY HH:mm')}</div>
+          <div class="meta">${t('common.total', 'Всього записів')}: ${filteredPayments.length} | ${t('financeOverview.totalIncomes', 'Всього отримано')}: ${stats.total.toFixed(2)} € | ${dayjs().format('DD.MM.YYYY HH:mm')}</div>
           <table>
             <thead>
               <tr>
                 <th>${t('payments.fields.date', 'Дата')}</th>
                 <th>${t('payments.fields.type', 'Тип')}</th>
                 <th>${t('cashDesk.payerOrSource', 'Платник / Джерело')}</th>
+                <th>${t('payments.fields.payerType', 'Тип платника')}</th>
                 <th>${t('payments.fields.period', 'Період')}</th>
                 <th class="amount">${t('payments.fields.amount', 'Сума')}</th>
-                <th>${t('payments.fields.status', 'Статус')}</th>
               </tr>
             </thead>
             <tbody>
@@ -379,9 +362,9 @@ export const CashDeskPage: React.FC = () => {
                   <td>${dayjs(p.date).format('DD.MM.YYYY')}</td>
                   <td>${t(`payments.types.${p.type}`, p.type)}</td>
                   <td>${p.member_name || p.source_name || '—'}</td>
+                  <td>${t(`payments.payerTypes.${p.payer_type}`, p.payer_type)}</td>
                   <td>${p.period || '—'}</td>
                   <td class="amount">${Number(p.amount).toFixed(2)} €</td>
-                  <td>${t(`payments.statuses.${p.status}`, p.status)}</td>
                 </tr>
               `
                 )
@@ -400,7 +383,7 @@ export const CashDeskPage: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: 4 }}>
-      {/* 1. Header с кнопкой "+ Додати надходження" слева */}
+      {/* 1. Header */}
       <Box
         sx={{
           display: 'flex',
@@ -411,7 +394,6 @@ export const CashDeskPage: React.FC = () => {
           gap: 2,
         }}
       >
-        {/* Левая часть: Кнопка + Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
           <Button
             variant="contained"
@@ -450,7 +432,6 @@ export const CashDeskPage: React.FC = () => {
           </Box>
         </Box>
 
-        {/* Правая часть: Кнопка Экспорта */}
         <Box>
           <Button
             variant="outlined"
@@ -486,10 +467,10 @@ export const CashDeskPage: React.FC = () => {
             <WalletIcon sx={{ fontSize: 40, color: 'primary.main' }} />
             <Box>
               <Typography variant="caption" color="text.secondary">
-                {t('payments.summary.totalPaid', 'Загальна каса (Оплачено)')}
+                {t('financeOverview.totalIncomes', 'Загальна каса')}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                {stats.paidTotal.toFixed(2)} €
+                {stats.total.toFixed(2)} €
               </Typography>
             </Box>
           </Paper>
@@ -497,13 +478,13 @@ export const CashDeskPage: React.FC = () => {
 
         <Grid size={{ xs: 12, sm: 4 }}>
           <Paper sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
-            <WarningIcon sx={{ fontSize: 40, color: stats.owedTotal > 0 ? 'warning.main' : 'text.disabled' }} />
+            <GroupsIcon sx={{ fontSize: 40, color: 'info.main' }} />
             <Box>
               <Typography variant="caption" color="text.secondary">
-                {t('payments.summary.totalOwed', 'Заборгованість')}
+                {t('financeOverview.payerBreakdown', 'Фіз. особи / Підприємства')}
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: stats.owedTotal > 0 ? 'warning.main' : 'text.primary' }}>
-                {stats.owedTotal.toFixed(2)} €
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                {stats.individualTotal.toFixed(2)} € / {stats.companyTotal.toFixed(2)} €
               </Typography>
             </Box>
           </Paper>
@@ -553,7 +534,6 @@ export const CashDeskPage: React.FC = () => {
           />
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ width: { xs: '100%', md: 'auto' } }}>
-            {/* Filter by Type */}
             <TextField
               select
               size="small"
@@ -570,17 +550,21 @@ export const CashDeskPage: React.FC = () => {
               ))}
             </TextField>
 
-            {/* Filter by Status */}
-            <ToggleButtonGroup
-              value={statusFilter}
-              exclusive
+            <TextField
+              select
               size="small"
-              onChange={(_, v) => v && setStatusFilter(v)}
+              value={payerTypeFilter}
+              onChange={(e) => setPayerTypeFilter(e.target.value)}
+              sx={{ minWidth: 160 }}
+              label={t('payments.fields.payerType', 'Платник')}
             >
-              <ToggleButton value="all">{t('common.all', 'Всі')}</ToggleButton>
-              <ToggleButton value="paid">{t('payments.statuses.paid', 'Оплачено')}</ToggleButton>
-              <ToggleButton value="owed">{t('payments.statuses.owed', 'Борг')}</ToggleButton>
-            </ToggleButtonGroup>
+              <MenuItem value="all">{t('common.all', 'Всі')}</MenuItem>
+              {(Object.keys(PAYER_TYPE_LABELS) as PayerType[]).map((pt) => (
+                <MenuItem key={pt} value={pt}>
+                  {t(`payments.payerTypes.${pt}`, PAYER_TYPE_LABELS[pt])}
+                </MenuItem>
+              ))}
+            </TextField>
           </Stack>
         </Box>
       </Paper>
@@ -620,9 +604,9 @@ export const CashDeskPage: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{t('payments.fields.type', 'Тип')}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{t('cashDesk.payerOrSource', 'Платник / Джерело')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('payments.fields.payerType', 'Тип платника')}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{t('payments.fields.period', 'Період')}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>{t('payments.fields.amount', 'Сума')}</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{t('payments.fields.status', 'Статус')}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>{t('common.actions', 'Дії')}</TableCell>
                 </TableRow>
               </TableHead>
@@ -649,16 +633,17 @@ export const CashDeskPage: React.FC = () => {
                         </Box>
                       )}
                     </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={t(`payments.payerTypes.${p.payer_type}`, p.payer_type_display || '')}
+                        size="small"
+                        variant="outlined"
+                        color={p.payer_type === 'company' ? 'info' : 'default'}
+                      />
+                    </TableCell>
                     <TableCell>{p.period || '—'}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
                       {Number(p.amount).toFixed(2)} €
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={t(`payments.statuses.${p.status}`, p.status_display || '')}
-                        color={p.status === 'paid' ? 'success' : 'warning'}
-                        size="small"
-                      />
                     </TableCell>
                     <TableCell align="right">
                       <Tooltip title={t('common.edit', 'Редагувати')}>
@@ -684,7 +669,7 @@ export const CashDeskPage: React.FC = () => {
         )}
       </Paper>
 
-      {/* 5. УНИВЕРСАЛЬНАЯ МОДАЛКА ДОБАВЛЕНИЯ / РЕДАКТИРОВАНИЯ */}
+      {/*5. UNIVERSAL MODAL FOR ADDING / EDITING*/}
       <Dialog open={dialogOpen} onClose={() => !saving && setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 600 }}>
           {editingId
@@ -696,7 +681,6 @@ export const CashDeskPage: React.FC = () => {
           <Stack spacing={2.5} sx={{ mt: 1 }}>
             {formError && <Alert severity="error">{formError}</Alert>}
 
-            {/* Выбор типа надхождения */}
             <TextField
               select
               label={t('payments.fields.type', 'Тип надходження')}
@@ -720,38 +704,27 @@ export const CashDeskPage: React.FC = () => {
               ))}
             </TextField>
 
-            {/* Динамическая часть: Член организации или Источник */}
             {form.type === 'membership_fee' ? (
-              <>
-                <Autocomplete
-                  options={members}
-                  getOptionLabel={(option) => `${option.last_name} ${option.first_name} (${option.email})`}
-                  value={form.member_obj || null}
-                  onChange={(_, value) => {
-                    setForm({
-                      ...form,
-                      member: value ? value.id : null,
-                      member_obj: value,
-                    });
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t('cashDesk.fields.selectMember', 'Член організації *')}
-                      placeholder={t('cashDesk.fields.searchMemberPlaceholder', 'Почніть вводити прізвище або email...')}
-                      fullWidth
-                    />
-                  )}
-                />
-
-                <TextField
-                  label={t('payments.fields.period', 'Період (рік або квартал)')}
-                  placeholder="2026 або 2026-Q1"
-                  value={form.period || ''}
-                  onChange={(e) => setForm({ ...form, period: e.target.value })}
-                  fullWidth
-                />
-              </>
+              <Autocomplete
+                options={members}
+                getOptionLabel={(option) => `${option.last_name} ${option.first_name} (${option.email})`}
+                value={form.member_obj || null}
+                onChange={(_, value) => {
+                  setForm({
+                    ...form,
+                    member: value ? value.id : null,
+                    member_obj: value,
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={t('cashDesk.fields.selectMember', 'Член організації *')}
+                    placeholder={t('cashDesk.fields.searchMemberPlaceholder', 'Почніть вводити прізвище або email...')}
+                    fullWidth
+                  />
+                )}
+              />
             ) : (
               <TextField
                 label={t('payments.fields.sourceName', 'Назва джерела / фонду / спонсора *')}
@@ -763,7 +736,28 @@ export const CashDeskPage: React.FC = () => {
               />
             )}
 
-            {/* Сумма и Дата */}
+            <TextField
+              label={t('payments.fields.period', 'Період ')}
+              placeholder={`${dayjs().year()} або ${dayjs().year()}-Q1`}
+              value={form.period || ''}
+              onChange={(e) => setForm({ ...form, period: e.target.value })}
+              fullWidth
+            />
+
+            <TextField
+              select
+              label={t('payments.fields.payerType', 'Тип платника')}
+              value={form.payer_type}
+              onChange={(e) => setForm({ ...form, payer_type: e.target.value as PayerType })}
+              fullWidth
+            >
+              {(Object.keys(PAYER_TYPE_LABELS) as PayerType[]).map((pt) => (
+                <MenuItem key={pt} value={pt}>
+                  {t(`payments.payerTypes.${pt}`, PAYER_TYPE_LABELS[pt])}
+                </MenuItem>
+              ))}
+            </TextField>
+
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
                 label={t('payments.fields.amount', 'Сума *')}
@@ -789,22 +783,6 @@ export const CashDeskPage: React.FC = () => {
               />
             </Stack>
 
-            {/* Статус */}
-            <TextField
-              select
-              label={t('payments.fields.status', 'Статус')}
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as PaymentStatus })}
-              fullWidth
-            >
-              {(Object.keys(PAYMENT_STATUS_LABELS) as PaymentStatus[]).map((st) => (
-                <MenuItem key={st} value={st}>
-                  {t(`payments.statuses.${st}`, PAYMENT_STATUS_LABELS[st])}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {/* Комментарий */}
             <TextField
               label={t('payments.fields.comment', 'Коментар')}
               value={form.comment || ''}
@@ -826,7 +804,7 @@ export const CashDeskPage: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* 6. МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ */}
+      {/*6. DELETION CONFIRMATION MODAL*/}
       <Dialog
         open={Boolean(deleteTarget)}
         onClose={() => !deleting && setDeleteTarget(null)}

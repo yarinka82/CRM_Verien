@@ -47,7 +47,7 @@ interface AppUser {
   date_joined: string;
 }
 
-// ---- Компонент для поля пароля ----
+// ---- Component for password field ----
 const PasswordField: React.FC<{
   label: string;
   value: string;

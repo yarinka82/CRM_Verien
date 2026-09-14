@@ -11,8 +11,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Сессия живёт в cookie, а не в localStorage —
-    // всегда пытаемся восстановить пользователя с бэкенда
+    // The session lives in a cookie, not in localStorage —
+    // always try to restore the user from the backend
     fetchUser();
   }, []);
 

@@ -23,7 +23,7 @@ class LoginView(APIView):
     authentication_classes = []
 
     def post(self, request):
-        # Заменяет @ensure_csrf_cookie: выдает свежий CSRF-токен в куки
+        # Replaces @ensure_csrf_cookie: issues a fresh CSRF token in cookies
         get_token(request)
 
         username = request.data.get('username')
@@ -62,7 +62,7 @@ class MeView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        # Принудительно генерирует и отправляет csrf-токен в куки
+        # Force generates and sends csrf token to cookies
         get_token(request)
 
         if not request.user.is_authenticated:
@@ -88,7 +88,7 @@ class ChangePasswordView(APIView):
         user.set_password(serializer.validated_data['new_password'])
         user.save()
 
-        # Сохраняем сессию активной после смены хеша пароля
+        # Keep the session active after changing the password hash
         update_session_auth_hash(request, user)
 
         return Response({'detail': 'Пароль оновлено.'})
