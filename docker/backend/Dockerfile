@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Prefer IPv4 over IPv6
-RUN printf 'precedence ::ffff:0:0/96  100\n' >> /etc/gai.conf
+RUN sed -i 's|^#precedence ::ffff:0:0/96  10|precedence ::ffff:0:0/96  100|' /etc/gai.conf \
+    && sed -i '/^precedence ::ffff:0:0\/96  1000$/d' /etc/gai.conf
 
 COPY backend/ .
 
