@@ -13,6 +13,7 @@ class MemberSerializer(serializers.ModelSerializer):
             'phone',
             'join_date',
             'status',
+            'payer_type',
             'is_founder',
             'birth_date',
             'address',

@@ -14,7 +14,6 @@ import {
   TableRow,
   TableCell,
   TableContainer,
-  Chip,
   Button,
   IconButton,
   Dialog,
@@ -39,8 +38,8 @@ import { paymentsApi } from '@/api/payments';
 import {
   Payment,
   PaymentFormData,
-  PaymentStatus,
-  PAYMENT_STATUS_LABELS,
+  PayerType,
+  PAYER_TYPE_LABELS,
 } from '@/types/payments';
 
 interface MemberPaymentsHistoryProps {
@@ -52,9 +51,9 @@ const emptyForm = (memberId: number): PaymentFormData => ({
   amount: '',
   date: dayjs().format('YYYY-MM-DD'),
   type: 'membership_fee',
+  payer_type: 'individual',
   source_name: '',
   period: `${dayjs().year()}`,
-  status: 'paid',
   comment: '',
 });
 
@@ -105,10 +104,10 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
       member: memberId,
       amount: String(payment.amount),
       date: payment.date,
-      type: 'membership_fee',
-      source_name: '',
+      type: payment.type,
+      payer_type: payment.payer_type,
+      source_name: payment.source_name || '',
       period: payment.period || '',
-      status: payment.status,
       comment: payment.comment || '',
     });
     setFormError(null);
@@ -163,23 +162,17 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
       await paymentsApi.deletePayment(id);
       setPayments((prev) => prev.filter((p) => p.id !== id));
       toast.success(t('payments.messages.deleteSuccess', 'Платіж успішно видалено'));
-      await fetchPayments();
     } catch (err) {
       console.error('Error deleting payment:', err);
       toast.error(t('payments.messages.deleteError', 'Не вдалося видалити платіж'));
     }
   };
 
-  const totalPaid = payments
-    .filter((p) => p.status === 'paid')
-    .reduce((sum, p) => sum + Number(p.amount), 0);
-  const totalOwed = payments
-    .filter((p) => p.status === 'owed')
-    .reduce((sum, p) => sum + Number(p.amount), 0);
+  const totalAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
     <Paper sx={{ p: 3, mt: 3 }}>
-      {/* Верхняя панель */}
+      {/*Top plate*/}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6">
           {t('payments.title.history', 'Історія платежів')}
@@ -207,7 +200,6 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
         </Typography>
       ) : (
         <>
-          {/* Скроллируемый контейнер таблицы с лимитом ~6 строк */}
           <TableContainer
             sx={{
               maxHeight: 310,
@@ -221,9 +213,9 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
                 <TableRow>
                   <TableCell sx={{ bgcolor: 'background.paper' }}>{t('payments.fields.date', 'Дата')}</TableCell>
                   <TableCell sx={{ bgcolor: 'background.paper' }}>{t('payments.fields.type', 'Тип')}</TableCell>
+                  <TableCell sx={{ bgcolor: 'background.paper' }}>{t('payments.fields.payerType', 'Платник')}</TableCell>
                   <TableCell sx={{ bgcolor: 'background.paper' }}>{t('payments.fields.period', 'Період')}</TableCell>
                   <TableCell sx={{ bgcolor: 'background.paper' }} align="right">{t('payments.fields.amount', 'Сума')}</TableCell>
-                  <TableCell sx={{ bgcolor: 'background.paper' }}>{t('payments.fields.status', 'Статус')}</TableCell>
                   <TableCell sx={{ bgcolor: 'background.paper' }} align="right" />
                 </TableRow>
               </TableHead>
@@ -232,15 +224,9 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
                   <TableRow key={payment.id} hover>
                     <TableCell>{dayjs(payment.date).format('DD.MM.YYYY')}</TableCell>
                     <TableCell>{t(`payments.types.${payment.type}`)}</TableCell>
+                    <TableCell>{t(`payments.payerTypes.${payment.payer_type}`, PAYER_TYPE_LABELS[payment.payer_type])}</TableCell>
                     <TableCell>{payment.period || '—'}</TableCell>
                     <TableCell align="right">{Number(payment.amount).toFixed(2)} €</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={t(`payments.statuses.${payment.status}`)}
-                        color={payment.status === 'paid' ? 'success' : 'warning'}
-                        size="small"
-                      />
-                    </TableCell>
                     <TableCell align="right">
                       <IconButton size="small" onClick={() => openEditDialog(payment)}>
                         <EditIcon fontSize="small" />
@@ -255,7 +241,6 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
             </Table>
           </TableContainer>
 
-          {/* Всегда видимый закрепленный блок с итогами */}
           <Stack
             direction="row"
             spacing={3}
@@ -267,18 +252,12 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              {t('payments.summary.totalPaid', 'Оплачено')}: <b>{totalPaid.toFixed(2)} €</b>
+              {t('payments.summary.total', 'Всього')}: <b>{totalAmount.toFixed(2)} €</b>
             </Typography>
-            {totalOwed > 0 && (
-              <Typography variant="body2" color="warning.main">
-                {t('payments.summary.totalOwed', 'Заборговано')}: <b>{totalOwed.toFixed(2)} €</b>
-              </Typography>
-            )}
           </Stack>
         </>
       )}
 
-      {/* Модальное окно добавления/редактирования */}
       <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
           {editingId
@@ -289,7 +268,6 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
           <Stack spacing={2} sx={{ mt: 1 }}>
             {formError && <Alert severity="error">{formError}</Alert>}
 
-            {/* 1. Сумма */}
             <TextField
               label={t('payments.fields.amount', 'Сума')}
               type="number"
@@ -304,7 +282,6 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
               autoFocus
             />
 
-            {/* 2. Дата */}
             <DatePicker
               label={t('payments.fields.date', 'Дата')}
               format="DD MM YYYY"
@@ -315,7 +292,6 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
               slotProps={{ textField: { fullWidth: true } }}
             />
 
-            {/* 3. Период */}
             <TextField
               label={t('payments.fields.period', 'Період')}
               placeholder="2026 або 2026-Q1"
@@ -324,22 +300,20 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
               fullWidth
             />
 
-            {/* 4. Статус */}
             <TextField
               select
-              label={t('payments.fields.status', 'Статус')}
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as PaymentStatus })}
+              label={t('payments.fields.payerType', 'Тип платника')}
+              value={form.payer_type}
+              onChange={(e) => setForm({ ...form, payer_type: e.target.value as PayerType })}
               fullWidth
             >
-              {(Object.keys(PAYMENT_STATUS_LABELS) as PaymentStatus[]).map((status) => (
-                <MenuItem key={status} value={status}>
-                  {t(`payments.statuses.${status}`, PAYMENT_STATUS_LABELS[status])}
+              {(Object.keys(PAYER_TYPE_LABELS) as PayerType[]).map((payerType) => (
+                <MenuItem key={payerType} value={payerType}>
+                  {t(`payments.payerTypes.${payerType}`, PAYER_TYPE_LABELS[payerType])}
                 </MenuItem>
               ))}
             </TextField>
 
-            {/* 5. Комментарий */}
             <TextField
               label={t('payments.fields.comment', 'Коментар')}
               value={form.comment || ''}

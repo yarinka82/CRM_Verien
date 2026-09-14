@@ -24,7 +24,9 @@
     "exportPDF": "Export to PDF",
     "yes": "Yes",
     "no": "No",
+    "close": "Close",
     "save": "Save",
+    "save2": "Save",
     "saving": "Saving...",
     "cancel": "Cancel",
     "create": "Create",
@@ -43,6 +45,9 @@
     "popupBlocked": "Please allow pop-ups for PDF printing"
   },
   "members": {
+    "payerType": "Payer type",
+    "payerTypeIndividual": "Individual",
+    "payerTypeCompany": "Company",
     "delete": "Delete",
     "deleteConfirmTitle": "Delete Member?",
     "deleteConfirmText": "Are you sure you want to delete {{name}}? This action cannot be undone.",
@@ -223,6 +228,7 @@
     "title": "Financial Overview",
     "totalPaid": "Received (Paid)",
     "totalOwed": "Total Owed",
+    "payerBreakdown": "Individuals / Companies",
     "monthlyDynamics": "Monthly Dynamics",
     "subtitle": "Financial Reporting & Analytics",
     "today": "Current",
@@ -247,7 +253,31 @@
     "totalOwed": "Total Owed",
     "chartTitle": "Revenue Dynamics",
     "loadError": "Failed to load charts"
-}
+  },
+  "documents": {
+    "subtitle": "Organization document flow",
+    "title": "Documents",
+    "upload": "Upload document",
+    "empty": "No documents yet",
+    "categories": {
+      "founding": "Founding document",
+      "internal": "Internal document",
+      "protocol": "Protocol",
+      "templates": "Templates"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "uploadedAt": "Uploaded",
+      "category": "Category"
+    },
+    "preview": "Preview",
+    "download": "Download",
+    "selectFile": "Choose PDF file",
+    "uploadTitle": "Upload document",
+    "confirmDeleteTitle": "Delete document?",
+    "confirmDeleteText": "Are you sure you want to delete"
+  }
 }
 
 

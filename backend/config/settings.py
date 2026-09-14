@@ -8,7 +8,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECRET_KEY - с запасным вариантом
+# SECRET_KEY - with a backup option
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-your-secret-key-here-for-development")
 
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
@@ -26,18 +26,44 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # third-party
+     # third-party
     'rest_framework',
     'django_filters',
     'corsheaders',
-    
     # local
     'apps.core',
     'apps.members',
     'apps.payments',
     'apps.users',
+    'apps.documents',
+    'storages',
 ]
+
+# Cloudflare R2 Storage
+r2_account_id = os.environ.get("CLOUDFLARE_R2_ACCOUNT_ID")
+
+AWS_ACCESS_KEY_ID = os.environ.get("CLOUDFLARE_R2_ACCESS_KEY")
+AWS_SECRET_ACCESS_KEY = os.environ.get("CLOUDFLARE_R2_SECRET_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("CLOUDFLARE_R2_BUCKET")
+AWS_S3_ENDPOINT_URL = f"https://{r2_account_id}.r2.cloudflarestorage.com"
+AWS_S3_REGION_NAME = "auto"
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_DEFAULT_ACL = None
+AWS_S3_FILE_OVERWRITE = False
+AWS_QUERYSTRING_EXPIRE = 3600
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+
+
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

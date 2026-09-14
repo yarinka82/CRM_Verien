@@ -86,7 +86,7 @@ const MemberDetail = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Заголовок */}
+      {/*Title*/}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Button
@@ -118,7 +118,7 @@ const MemberDetail = () => {
       </Box>
 
       <Grid container spacing={3}>
-        {/* Основная информация */}
+        {/*Basic Info*/}
         <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -216,10 +216,10 @@ const MemberDetail = () => {
           </Paper>
         </Grid>
 
-        {/* Информационные карточки */}
+        {/*Info Cards*/}
         <Grid size={{ xs: 12, md: 4 }}>
           <Stack spacing={3}>
-            {/* Статус засновника */}
+            {/*Founder status*/}
             <Paper sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 {member.is_founder ? (
@@ -240,7 +240,7 @@ const MemberDetail = () => {
               </Box>
             </Paper>
 
-            {/* Дата регистрации */}
+            {/*Registration date*/}
             <Paper sx={{ p: 3 }}>
               <Typography variant="caption" color="text.secondary">
                 {t('members.memberSince')}
@@ -253,7 +253,7 @@ const MemberDetail = () => {
               </Typography>
             </Paper>
 
-            {/* Действия */}
+            {/*Actions*/}
             <Paper sx={{ p: 3 }}>
               <Typography variant="subtitle2" gutterBottom>
                 {t('common.actions')}
@@ -267,7 +267,7 @@ const MemberDetail = () => {
                 >
                   {t('common.edit')}
                 </Button>
-                {/* другие действия */}
+                {/*Else actions*/}
               </Stack>
             </Paper>
           </Stack>

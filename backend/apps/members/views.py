@@ -86,8 +86,7 @@ def member_edit(request, pk):
 
 
 def home_view(request):
-    html = """
-    <!DOCTYPE html>
+    html = """<!DOCTYPE html>
     <html>
     <head>
         <title>CRM System</title>
@@ -116,6 +115,5 @@ def home_view(request):
             </p>
         </div>
     </body>
-    </html>
-    """
+    </html>"""
     return HttpResponse(html)

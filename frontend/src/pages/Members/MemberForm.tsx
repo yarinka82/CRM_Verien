@@ -43,6 +43,7 @@ const MemberForm = () => {
     address: '',
     join_date: dayjs().format('YYYY-MM-DD'),
     status: 'active',
+    payer_type: 'individual',
     is_founder: false,
     notes: '',
   });
@@ -65,6 +66,7 @@ const MemberForm = () => {
         address: member.address || '',
         join_date: member.join_date,
         status: member.status,
+        payer_type: member.payer_type,
         is_founder: member.is_founder,
         notes: member.notes || '',
       });
@@ -110,10 +112,11 @@ const MemberForm = () => {
       </Box>
     );
   }
-
+  console.log('FORM DATA:', formData);
+console.log('PAYER TYPE:', formData.payer_type);
   return (
     <Box sx={{ p: 3 }}>
-      {/* Заголовок */}
+      {/*Title*/}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
         <Button
           variant="outlined"
@@ -216,6 +219,7 @@ const MemberForm = () => {
                 onChange={(e) => handleChange('address', e.target.value)}
               />
             </Grid>
+
             <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 select
@@ -229,6 +233,21 @@ const MemberForm = () => {
                 <MenuItem value="inactive">{t('members.statusInactive')}</MenuItem>
               </TextField>
             </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                select
+                label={t('members.payerType')}
+                required
+                fullWidth
+                value={formData.payer_type}
+                onChange={(e) => handleChange('payer_type', e.target.value)}
+              >
+                <MenuItem value="individual">{t('members.payerTypeIndividual')}</MenuItem>
+                <MenuItem value="company">{t('members.payerTypeCompany')}</MenuItem>
+              </TextField>
+            </Grid>
+
             <Grid size={{ xs: 12, md: 6 }}>
               <FormControlLabel
                 control={
@@ -241,6 +260,7 @@ const MemberForm = () => {
                 label={t('members.isFounder')}
               />
             </Grid>
+
             <Grid size={{ xs: 12 }}>
               <TextField
                 label={t('members.notes')}

@@ -1,37 +1,37 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+
 
 
 class Member(models.Model):
-    """
-    Модель учасника (Member) організації/клубу.
-    Віповідає бізнес-вимогам MVP та закладає фундамент для аналітики й CRM.
-    """
+    class PayerType(models.TextChoices):
+        INDIVIDUAL = 'individual', 'Фізична особа'
+        COMPANY = 'company', 'Підприємство'
+
     STATUS_CHOICES = [
         ('active', 'Активний'),
         ('inactive', 'Неактивний'),
     ]
 
-    first_name = models.CharField(
-        max_length=100, 
-        verbose_name=_('First Name')
+    payer_type = models.CharField(
+        max_length=20,
+        choices=PayerType.choices,
+        default=PayerType.INDIVIDUAL,
+        verbose_name='Тип особи',
     )
-    last_name = models.CharField(
-        max_length=100, 
-        verbose_name=_('Last Name')
-    )
+    first_name = models.CharField(max_length=100, verbose_name='First Name')
+    last_name = models.CharField(max_length=100, verbose_name='Last Name')
     email = models.EmailField(
         unique=True,
-        verbose_name=_('Email Address')
+        verbose_name=('Email Address')
     )
     phone = models.CharField(
         max_length=30, 
         blank=True,
-        verbose_name=_('Phone Number')
+        verbose_name=('Phone Number')
     )
 
     join_date = models.DateField(
-        verbose_name=_('Join Date')
+        verbose_name=('Join Date')
     )
     
     status = models.CharField('Статус',
@@ -39,36 +39,36 @@ class Member(models.Model):
     
     is_founder = models.BooleanField(
         default=False, 
-        verbose_name=_('Is Founder')
+        verbose_name=('Is Founder')
     )
     
-    # Системні поля для аудиту та відстеження
+    # System Fields for Audit and Tracking
     created_at = models.DateTimeField(
         auto_now_add=True, 
-        verbose_name=_('Created At')
+        verbose_name=('Created At')
     )
     updated_at = models.DateTimeField(
         auto_now=True, 
-        verbose_name=_('Updated At')
+        verbose_name=('Updated At')
     )
-    # дод. поля
+    # add. fields
     birth_date = models.DateField(
-        verbose_name=_('Дата народження'),
+        verbose_name=('Дата народження'),
         null=True,
         blank=True
     )
     address = models.CharField(
-        verbose_name=_('Адреса'),
+        verbose_name=('Адреса'),
         max_length=255,
         blank=True
     )
     notes = models.TextField(
-        verbose_name=_('Примітки'),
+        verbose_name=('Примітки'),
         blank=True
     )
     class Meta:
-        verbose_name = _('Member')
-        verbose_name_plural = _('Members')
+        verbose_name = ('Member')
+        verbose_name_plural = ('Members')
         ordering = ['-join_date', 'last_name', 'first_name']
         indexes = [
             models.Index(fields=['status', 'join_date'],

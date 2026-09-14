@@ -24,7 +24,9 @@
     "yes": "Так",
     "no": "Ні",
     "refresh": "Оновити",
+    "close": "Закрити",
     "save": "Зберегти",
+    "save2": "Завантажити",
     "saving": "Збереження...",
     "cancel": "Скасувати",
     "create": "Створити",
@@ -43,6 +45,9 @@
     "popupBlocked": "Дозвольте спливаючі вікна для друку PDF"
   },
   "members": {
+    "payerType": "Тип платника",
+    "payerTypeIndividual": "Фізична особа",
+    "payerTypeCompany": "Підприємство",
     "delete": "Видалити",
     "deleteConfirmTitle": "Видалити члена?",
     "deleteConfirmText": "Ви впевнені, що хочете видалити {{name}}? Цю дію неможливо скасувати.",
@@ -157,8 +162,6 @@
     },
     "statuses": {
       "paid": "Оплачено",
-      "owed": "Заборгованість",
-      "pending": "В очікуванні",
       "cancelled": "Скасовано",
       "refunded": "Повернено"
     },
@@ -224,6 +227,7 @@
     "totalPaid": "Отримано (оплачено)",
     "totalOwed": "Заборгованість",
     "monthlyDynamics": "Динаміка по місяцях",
+    "payerBreakdown": "Фіз.особи / Підприємства",
     "subtitle": "Фінансова звітність та аналіз",
     "today": "Поточний",
     "yearSuffix": "рік",
@@ -247,7 +251,29 @@
     "totalOwed": "Заборгованість",
     "chartTitle": "Динаміка надходжень",
     "loadError": "Не вдалося завантажити графіки"
-}
-
-
+  },
+    "documents": {
+    "subtitle": "Документообіг організації",
+    "title": "Документи",
+    "upload": "Завантажити документ",
+    "empty": "Документів ще немає",
+    "categories": {
+      "founding": "Установчий документ",
+      "internal": "Внутрішній документ",
+      "protocol": "Протокол",
+      "templates": "Шаблони"
+    },
+    "fields": {
+      "title": "Назва",
+      "description": "Опис",
+      "uploadedAt": "Завантажено",
+      "category": "Категорія"
+    },
+    "preview": "Переглянути",
+    "download": "Завантажити",
+    "selectFile": "Обрати PDF-файл",
+    "uploadTitle": "Завантажити документ",
+    "confirmDeleteTitle": "Видалити документ?",
+    "confirmDeleteText": "Ви впевнені, що хочете видалити"
+  }
 }

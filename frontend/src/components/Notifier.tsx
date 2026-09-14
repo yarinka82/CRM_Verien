@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Snackbar, Alert, AlertColor } from '@mui/material';
 
-// Описание типа события
+// Event Type Description
 interface NotifyDetail {
   message: string;
   severity: AlertColor;
@@ -49,14 +49,14 @@ const Notifier: React.FC = () => {
 
 export default Notifier;
 
-// Базовая функция вызова
+// Basic call function
 function triggerToast(message: string, severity: AlertColor = 'info') {
   window.dispatchEvent(
     new CustomEvent<NotifyDetail>('notify', { detail: { message, severity } })
   );
 }
 
-// Удобная обертка с методами .success(), .error(), .warning(), .info()
+// Convenient wrapper with .success (), .error(), .warning (), .info() methods
 export const toast = Object.assign(triggerToast, {
   success: (message: string) => triggerToast(message, 'success'),
   error: (message: string) => triggerToast(message, 'error'),

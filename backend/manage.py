@@ -4,9 +4,9 @@ import sys
 
 
 def main():
-    # Если settings.py в корне backend
+    # If settings.py is root backend
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-        # Или если в папке backend (backend/backend/settings.py)
+        # Or if in the backend folder (backend/backend/settings.py)
     # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
     
     try:

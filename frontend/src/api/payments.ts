@@ -24,22 +24,22 @@ function buildQuery(params?: Record<string, string | number | undefined>): strin
 
 
 export const paymentsApi = {
-  // 1. Получение списка платежей (с безопасным приведением параметров для query)
+  // 1. Get a list of payments (with secure query parameters)
   getPayments: async (params?: PaymentListParams): Promise<Payment[]> => {
     return apiClient.get(`${BASE_URL}${buildQuery(params as Record<string, any>)}`);
   },
 
-  // 2. Получение одного платежа
+  // 2. Receipt of one payment
   getPayment: async (id: number): Promise<Payment> => {
     return apiClient.get(`${BASE_URL}${id}/`);
   },
 
-  // 3. Создание платежа
+  // creation of payment
   createPayment: async (payload: PaymentFormData): Promise<Payment> => {
     return apiClient.post(BASE_URL, payload);
   },
 
-  // 4. Полное обновление (PUT) через apiFetch с заголовком application/json
+  // 4. Full update (put) via apiFetch with application/json header
   updatePayment: async (id: number, payload: PaymentFormData): Promise<Payment> => {
     const response = await apiFetch(`${BASE_URL}${id}/`, {
       method: 'PUT',
@@ -56,17 +56,17 @@ export const paymentsApi = {
     return response.json();
   },
 
-  // 5. Частичное обновление (PATCH)
+  // 5. Partial update (PATCH)
   patchPayment: async (id: number, payload: Partial<PaymentFormData>): Promise<Payment> => {
     return apiClient.patch(`${BASE_URL}${id}/`, payload);
   },
 
-  // 6. Удаление платежа
+  // 6. Deleting a payment
   deletePayment: async (id: number): Promise<void> => {
     await apiClient.delete(`${BASE_URL}${id}/`);
   },
 
-  // 7. Финансовая сводка
+  // Financial summary
   getFinancialOverview: async (params?: {
     date_from?: string;
     date_to?: string;

@@ -24,7 +24,9 @@
     "yes": "Ja",
     "no": "Nein",
     "refresh": "Aktualisieren",
+    "close": "Schließen",
     "save": "Speichern",
+    "save2": "Speichern",
     "saving": "Speichern...",
     "cancel": "Abbrechen",
     "create": "Erstellen",
@@ -43,6 +45,9 @@
     "popupBlocked": "Bitte Pop-ups für den PDF-Druck erlauben"
   },
   "members": {
+    "payerType": "Zahlungstyp",
+    "payerTypeIndividual": "Privatperson",
+    "payerTypeCompany": "Unternehmen",
     "delete": "Löschen",
     "deleteConfirmTitle": "Mitglied löschen?",
     "deleteConfirmText": "Sind Sie sicher, dass Sie {{name}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
@@ -222,6 +227,7 @@
   "financeOverview": {
     "totalPaid": "Erhalten (bezahlt)",
     "monthlyDynamics": "Monatliche Entwicklung",
+    "payerBreakdown": "Privatpersonen / Unternehmen",
     "loadError": "Finanzübersicht konnte nicht geladen werden",
     "title": "Finanzanalyse & Berichte",
     "subtitle": "Finanzberichterstattung und Aufschlüsselung",
@@ -247,10 +253,29 @@
     "totalOwed": "Ausstehend",
     "chartTitle": "Einnahmendynamik",
     "loadError": "Diagramme konnten nicht geladen werden"
-}
-
-
-
-
-
+  },
+    "documents": {
+    "subtitle": "Dokumentenfluss der Organisation",
+    "title": "Dokumente",
+    "upload": "Dokument hochladen",
+    "empty": "Noch keine Dokumente",
+    "categories": {
+      "founding": "Gründungsdokument",
+      "internal": "Internes Dokument",
+      "protocol": "Protokoll",
+      "templates": "Vorlagen"
+    },
+    "fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "uploadedAt": "Hochgeladen",
+      "category": "Kategorie"
+    },
+    "preview": "Ansehen",
+    "download": "Herunterladen",
+    "selectFile": "PDF-Datei auswählen",
+    "uploadTitle": "Dokument hochladen",
+    "confirmDeleteTitle": "Dokument löschen?",
+    "confirmDeleteText": "Sind Sie sicher, dass Sie löschen möchten"
+  }
 }

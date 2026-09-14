@@ -1,28 +1,21 @@
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Sum
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncQuarter
 from django.utils.dateparse import parse_date
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Payment
-
 from .serializers import PaymentSerializer
 
 
 
 class PaymentViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
-    """
-    CRUD для платежів/надходжень.
-    Підтримує фільтрацію списку через query-параметри:
-    ?type=donation&status=paid&member=<id>&date_from=2026-01-01&date_to=2026-12-31
-    """
 
     def _get_queryset(self):
-        qs = Payment.objects.select_related('member').all()
-        return qs
+        return Payment.objects.select_related('member').all()
 
     def _filter_queryset(self, qs, request):
         params = request.query_params
@@ -31,9 +24,9 @@ class PaymentViewSet(viewsets.ViewSet):
         if payment_type:
             qs = qs.filter(type=payment_type)
 
-        payment_status = params.get('status')
-        if payment_status:
-            qs = qs.filter(status=payment_status)
+        payer_type = params.get('payer_type')
+        if payer_type:
+            qs = qs.filter(payer_type=payer_type)
 
         member_id = params.get('member')
         if member_id:
@@ -64,8 +57,7 @@ class PaymentViewSet(viewsets.ViewSet):
         payment = self._get_queryset().filter(pk=pk).first()
         if payment is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = PaymentSerializer(payment)
-        return Response(serializer.data)
+        return Response(PaymentSerializer(payment).data)
 
     def update(self, request, pk=None):
         payment = self._get_queryset().filter(pk=pk).first()
@@ -93,93 +85,100 @@ class PaymentViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
 class FinancialOverviewView(APIView):
-    permission_classes = [IsAuthenticated]
-    """
-    Сторінка "Фінансовий огляд": загальна сума надходжень за період
-    (тільки оплачені), розбивка по типах, по статусу (paid/owed)
-    та по періодах (місяцях) — для графіку динаміки.
+    """Financial Overview page: total revenue for the period,
+    breakdown by types, by type of payer (individual/subcontractor/other)
+    and by periods (months and quarters) — for dynamics graphs.
+
+    Debt (owed) cleared — each Payment record is a fact
+    completed receipt, the status is no more.
 
     GET /api/financial-overview/?date_from=2026-01-01&date_to=2026-12-31
-    Без параметрів — за весь час.
-    """
-    
+    Without parameters — all the time."""
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        base_qs = Payment.objects.all()
-        
+        qs = Payment.objects.all()
+
         date_from = parse_date(request.query_params.get('date_from', '') or '')
         if date_from:
-            base_qs = base_qs.filter(date__gte=date_from)
-        
+            qs = qs.filter(date__gte=date_from)
+
         date_to = parse_date(request.query_params.get('date_to', '') or '')
         if date_to:
-            base_qs = base_qs.filter(date__lte=date_to)
-        
-        paid_qs = base_qs.filter(status=Payment.PaymentStatus.PAID)
-        owed_qs = base_qs.filter(status=Payment.PaymentStatus.OWED)
-        
-        total = paid_qs.aggregate(total=Sum('amount'))['total'] or 0
-        owed_total = owed_qs.aggregate(total=Sum('amount'))['total'] or 0
-        
-        # --- розбивка по типах (як і раніше) ---
-        paid_by_type = {
+            qs = qs.filter(date__lte=date_to)
+
+        total = qs.aggregate(total=Sum('amount'))['total'] or 0
+
+        # --- breakdown by receipt type ---
+        by_type = {
             row['type']: row['total']
-            for row in paid_qs.values('type').annotate(total=Sum('amount'))
+            for row in qs.values('type').annotate(total=Sum('amount'))
         }
-        owed_by_type = {
-            row['type']: row['total']
-            for row in owed_qs.values('type').annotate(total=Sum('amount'))
-        }
-        
-        breakdown = []
-        for value, label in Payment.PaymentType.choices:
-            breakdown.append({
+        breakdown = [
+            {
                 'type': value,
                 'type_display': str(label),
-                'total': paid_by_type.get(value, 0),
-                'owed': owed_by_type.get(value, 0),
-            })
-        
-        # --- НОВЕ: розбивка по періодах (місяцях) ---
-        # Групуємо і оплачені, і заборговані суми по місяцю дати платежу,
-        # щоб фронт міг намалювати один графік із двома рядами (paid / owed).
-        # NB: анотацію не можна назвати "period" — так називається поле моделі Payment.
-        paid_by_period = {
-            row['month']: row['total']
-            for row in (
-                paid_qs
-                .annotate(month=TruncMonth('date'))
-                .values('month')
-                .annotate(total=Sum('amount'))
-                .order_by('month')
-            )
+                'total': by_type.get(value, 0),
+            }
+            for value, label in Payment.PaymentType.choices
+        ]
+
+        # --- breakdown by payer type (individual/subcontractor/other) ---
+        by_payer_type = {
+            row['payer_type']: row['total']
+            for row in qs.values('payer_type').annotate(total=Sum('amount'))
         }
-        owed_by_period = {
-            row['month']: row['total']
-            for row in (
-                owed_qs
-                .annotate(month=TruncMonth('date'))
-                .values('month')
-                .annotate(total=Sum('amount'))
-                .order_by('month')
-            )
-        }
-        
-        all_periods = sorted(set(paid_by_period) | set(owed_by_period))
+        payer_breakdown = [
+            {
+                'payer_type': value,
+                'payer_type_display': str(label),
+                'total': by_payer_type.get(value, 0),
+            }
+            for value, label in Payment.PayerType.choices
+        ]
+
+        # --- breakdown by months (for the "per year" chart) ---
+        # NB: the annotation cannot be called "period" — this is the name of the Payment model field.
+        by_month_qs = (
+            qs
+            .annotate(month=TruncMonth('date'))
+            .values('month')
+            .annotate(total=Sum('amount'))
+            .order_by('month')
+        )
         by_period = [
             {
-                'period': month.strftime('%Y-%m') if month else None,
-                'total': paid_by_period.get(month, 0),
-                'owed': owed_by_period.get(month, 0),
+                'period': row['month'].strftime('%Y-%m') if row['month'] else None,
+                'total': row['total'],
             }
-            for month in all_periods
+            for row in by_month_qs
         ]
-        
+
+        # --- breakdown by quarters (for the chart "by quarters") ---
+        by_quarter_qs = (
+            qs
+            .annotate(quarter=TruncQuarter('date'))
+            .values('quarter')
+            .annotate(total=Sum('amount'))
+            .order_by('quarter')
+        )
+        by_period_quarterly = [
+            {
+                # TruncQuarter returns the first day of the quarter — we count the quarter number from the month
+                'period': f"{row['quarter'].year}-Q{(row['quarter'].month - 1) // 3 + 1}" if row['quarter'] else None,
+                'total': row['total'],
+            }
+            for row in by_quarter_qs
+        ]
+
         return Response({
             'date_from': date_from,
             'date_to': date_to,
             'total': total,
-            'owed_total': owed_total,
             'breakdown': breakdown,
+            'payer_breakdown': payer_breakdown,
             'by_period': by_period,
+            'by_period_quarterly': by_period_quarterly,
         })
