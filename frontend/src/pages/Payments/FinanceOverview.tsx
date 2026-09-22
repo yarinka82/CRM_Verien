@@ -349,7 +349,15 @@ export const FinanceOverviewPage: React.FC = () => {
         {/*🟢 CARD 1: EARNINGS -> transition to /cashdesk*/}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper
-            onClick={() => navigate('/cashdesk')}
+            onClick={() => {
+              // Если выбран год — передаем "2026", если месяц — "MM.YYYY" (например, "08.2026")
+              const searchParam =
+                periodMode === 'year'
+                  ? currentDate.format('YYYY')
+                  : currentDate.format('MM.YYYY');
+
+              navigate(`/cashdesk?search=${searchParam}`);
+            }}
             sx={{
               p: 2,
               borderRadius: 2,
@@ -386,7 +394,9 @@ export const FinanceOverviewPage: React.FC = () => {
         {/*🔴 CARD 2: EXPENSES -> transition to /expenses*/}
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper
-            onClick={() => navigate('/expenses')}
+            onClick={() =>
+              navigate(`/expenses?mode=${periodMode}&date=${currentDate.format('YYYY-MM-DD')}`)
+            }
             sx={{
               p: 2,
               borderRadius: 2,
