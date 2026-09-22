@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import {
   Box,
   Paper,
@@ -87,12 +88,16 @@ const emptyUniversalForm = (): CashDeskFormData => ({
 export const CashDeskPage: React.FC = () => {
   const { t } = useTranslation();
 
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
   const [payments, setPayments] = useState<Payment[]>([]);
   const [members, setMembers] = useState<MemberShort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [searchQuery, setSearchQuery] = useState('');
+
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [payerTypeFilter, setPayerTypeFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -192,16 +197,27 @@ export const CashDeskPage: React.FC = () => {
   }, [payments, membersMap, typeFilter, payerTypeFilter, searchQuery, sortOrder, t]);
 
   const stats = useMemo(() => {
-    const total = payments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const individualTotal = payments
-      .filter((p) => p.payer_type === 'individual')
-      .reduce((sum, p) => sum + Number(p.amount), 0);
-    const companyTotal = payments
-      .filter((p) => p.payer_type === 'company')
-      .reduce((sum, p) => sum + Number(p.amount), 0);
-    const count = payments.length;
-    return { total, individualTotal, companyTotal, count };
-  }, [payments]);
+    let total = 0;
+    let individualTotal = 0;
+    let companyTotal = 0;
+
+    filteredPayments.forEach((p) => {
+      const amt = Number(p.amount) || 0;
+      total += amt;
+      if (p.payer_type === 'individual') {
+        individualTotal += amt;
+      } else if (p.payer_type === 'company') {
+        companyTotal += amt;
+      }
+    });
+
+    return {
+      total,
+      individualTotal,
+      companyTotal,
+      count: filteredPayments.length,
+    };
+  }, [filteredPayments]);
 
   const handleOpenCreate = () => {
     setEditingId(null);

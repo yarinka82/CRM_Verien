@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   Box,
@@ -55,6 +56,19 @@ const emptyForm = (): ExpenseFormData => ({
 const ExpensesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
 
+  const [searchParams] = useSearchParams();
+  const modeParam = searchParams.get('mode');
+  const dateParam = searchParams.get('date');
+
+  const [periodMode, setPeriodMode] = useState<PeriodMode>(
+    modeParam === 'year' || modeParam === 'month' ? modeParam : 'month'
+  );
+
+
+  const [currentDate, setCurrentDate] = useState<Dayjs>(
+    dateParam && dayjs(dateParam).isValid() ? dayjs(dateParam) : dayjs()
+  );
+
   const EXPENSE_SUGGESTIONS = [
     t('expenses.suggestions.rent', 'Оренда приміщення'),
     t('expenses.suggestions.utilities', 'Комунальні послуги'),
@@ -66,9 +80,7 @@ const ExpensesPage: React.FC = () => {
     t('expenses.suggestions.household', 'Господарські витрати'),
   ];
 
-  const [periodMode, setPeriodMode] = useState<PeriodMode>('month');
-  const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
-
+  
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
