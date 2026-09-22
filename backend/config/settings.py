@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     # local
-    'apps.core',
+    'apps.expenses',
     'apps.members',
     'apps.payments',
     'apps.users',

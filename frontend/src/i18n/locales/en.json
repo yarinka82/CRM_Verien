@@ -10,8 +10,10 @@
     "home": "Dashboard",
     "members": "Members Registry",
     "cashDesk": "Cash Desk & Incomes",
+    "expenses": "Expenses",
     "financeAnalytics": "Financial Analytics",
     "financeCharts": "Charts & Trends",
+    "documents": "Documents",
     "settings": "Settings"
   },
   "common": {
@@ -154,6 +156,11 @@
       "grant": "Grant",
       "other": "Other"
     },
+    "payerTypes": {
+      "individual": "Individual",
+      "company": "Company",
+      "other": "Other"
+    },
     "statuses": {
       "paid": "Paid",
       "owed": "Owed",
@@ -175,6 +182,7 @@
       "amount": "Amount",
       "status": "Status",
       "sourceName": "Source",
+      "payerType": "Payer Type",
       "comment": "Comment"
     },
     "summary": {
@@ -226,25 +234,32 @@
   },
   "financeOverview": {
     "title": "Financial Overview",
+    "today": "Current",
+    "yearSuffix": "year",
+    "empty": "No financial transactions for this period",
+    "loadError": "Failed to load analytics",
+    "totalIncomes": "Total Income",
+    "totalExpenses": "Total Expenses",
+    "netBalance": "Net Balance (Cashflow)",
+    "otherIncome": "Other Incomes",
+    "monthlyDynamics": "Monthly Dynamics",
+    "yearlyDynamics": "Yearly Dynamics",
+    "dateCol": "Date",
+    "monthCol": "Month",
+    "incomesCol": "Income",
+    "expensesCol": "Expenses",
+    "netCol": "Balance",
+    "totalCol": "TOTAL",
+    "modes": {
+      "month": "Month",
+      "year": "Year"
+    },
     "totalPaid": "Received (Paid)",
     "totalOwed": "Total Owed",
     "payerBreakdown": "Individuals / Companies",
-    "monthlyDynamics": "Monthly Dynamics",
     "subtitle": "Financial Reporting & Analytics",
-    "today": "Current",
-    "yearSuffix": "year",
-    "empty": "No transactions found for this period",
-    "totalIncomes": "Total Received",
-    "monthCol": "Month",
-    "dateCol": "Date",
     "totalPaidCol": "Total Paid",
-    "totalOwedCol": "Owed",
-    "loadError": "Failed to load analytics",
-    "modes": {
-      "month": "Month",
-      "quarter": "Quarter",
-      "year": "Year"
-    }
+    "totalOwedCol": "Owed"
   },
   "financeCharts": {
     "title": "Dynamics & Charts",
@@ -277,8 +292,58 @@
     "uploadTitle": "Upload document",
     "confirmDeleteTitle": "Delete document?",
     "confirmDeleteText": "Are you sure you want to delete"
+  },
+  "datePicker": {
+    "weekdays": [
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa",
+      "Su"
+    ],
+    "placeholder": "MM/DD/YYYY",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "clear": "Clear"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "subtitle": "Organization Expense Accounting",
+    "add": "Add Expense",
+    "addTitle": "New Expense",
+    "editTitle": "Edit Expense",
+    "titlePlaceholder": "E.g.: office rent, office supplies purchase",
+    "totalForPeriod": "Total spent for period",
+    "empty": "No expenses for this period",
+    "loadError": "Failed to load expenses",
+    "saveError": "Failed to save expense",
+    "createSuccess": "Expense added",
+    "updateSuccess": "Expense updated",
+    "deleteSuccess": "Expense deleted",
+    "deleteError": "Failed to delete expense",
+    "confirmDeleteTitle": "Delete Expense?",
+    "confirmDeleteText": "Delete expense",
+    "fields": {
+      "date": "Date",
+      "title": "Title",
+      "amount": "Amount"
+    },
+    "suggestions": {
+      "rent": "Premises Rent",
+      "utilities": "Utilities",
+      "goods": "Goods / Product Purchase",
+      "stationery": "Office Supplies / Stationery",
+      "logistics": "Transport / Logistics Expenses",
+      "bank": "Bank Fees & Services",
+      "services": "Contractor / Service Fees",
+      "household": "Operating / Household Expenses"
+    }
+
   }
 }
+
 
 
 

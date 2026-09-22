@@ -1,0 +1,18 @@
+
+.date-field {
+  position: relative;
+  width: 100%;
+}
+
+.date-field-label {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  padding: 0 4px;
+  background: #fff;
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}

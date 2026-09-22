@@ -1,18 +1,16 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AuthProvider } from './context/AuthContext';
 import { MainLayout } from './layouts';
 import Notifier from '@/components/Notifier';
-import { Home, Login, MemberList, MemberDetail, MemberForm, Settings, FinanceOverview, CashDeskPage, DocumentsPage } from './pages';
-
+import { Home, Login, MemberList, MemberDetail, MemberForm, Settings, FinanceOverview, CashDeskPage} from './pages';
+import { ExpensesPage, DocumentsPage  } from './pages';
 import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   return (
     <AuthProvider>
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+
       <BrowserRouter
         future={{
           v7_startTransition: true,
@@ -43,12 +41,13 @@ function App() {
               <Route path="cashdesk" element={<CashDeskPage />} />
               <Route path="finance" element={<FinanceOverview />} />
               <Route path="documents" element={<DocumentsPage />} />
+              <Route path="expenses" element={<ExpensesPage />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>
         </>
       </BrowserRouter>
-    </LocalizationProvider>
+
     </AuthProvider>
   );
 }

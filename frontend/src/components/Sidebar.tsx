@@ -16,6 +16,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import GroupIcon from '@mui/icons-material/Group';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import DescriptionIcon from '@mui/icons-material/Description';
 import SettingsIcon from '@mui/icons-material/Settings';
 
@@ -46,11 +47,17 @@ const Sidebar: React.FC = () => {
       path: '/cashdesk'
     },
     {
+      label: t('nav.expenses', 'Витрати'),
+       icon: <MoneyOffIcon />,
+       path: '/expenses'
+     },
+    {
       label: t('nav.financeAnalytics', 'Фінансовий огляд'),
       icon: <TableChartIcon />,
       path: '/finance'
     },
-    {
+
+      {
       label: t('nav.documents', 'Документи'),
       icon: <DescriptionIcon />,
       path: '/documents'

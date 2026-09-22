@@ -10,6 +10,8 @@
     "home": "Головна",
     "members": "Реєстр членів",
     "cashDesk": "Каса та надходження",
+    "expenses": "Витрати",
+    "documents": "Документи",
     "financeAnalytics": "Фінансовий огляд та аналітика",
     "financeCharts": "Графіки та тренди",
     "settings": "Налаштування"
@@ -160,6 +162,11 @@
       "grant": "Грант",
       "other": "Інше"
     },
+    "payerTypes": {
+      "individual": "Фізична особа",
+      "company": "Підприємство",
+      "other": "Інше"
+    },
     "statuses": {
       "paid": "Оплачено",
       "cancelled": "Скасовано",
@@ -170,6 +177,7 @@
       "date": "Дата",
       "type": "Тип",
       "period": "Період",
+      "payerType": "Тип платника",
       "amount": "Сума",
       "status": "Статус",
       "sourceName": "Джерело",
@@ -224,25 +232,32 @@
   },
   "financeOverview": {
     "title": "Фінансовий огляд",
-    "totalPaid": "Отримано (оплачено)",
-    "totalOwed": "Заборгованість",
-    "monthlyDynamics": "Динаміка по місяцях",
-    "payerBreakdown": "Фіз.особи / Підприємства",
     "subtitle": "Фінансова звітність та аналіз",
     "today": "Поточний",
     "yearSuffix": "рік",
     "empty": "Немає фінансових операцій за цей період",
-    "totalIncomes": "Всього отримано",
-    "monthCol": "Місяць",
-    "dateCol": "Дата",
-    "totalPaidCol": "Всього сплачено",
-    "totalOwedCol": "Борг",
     "loadError": "Не вдалося завантажити аналітику",
+    "totalIncomes": "Всього доходів",
+    "totalExpenses": "Всього витрат",
+    "netBalance": "Чистий баланс (Сальдо)",
+    "otherIncome": "Інші доходи",
+    "monthlyDynamics": "Динаміка по місяцях",
+    "yearlyDynamics": "Динаміка по роках",
+    "dateCol": "Дата",
+    "monthCol": "Місяць",
+    "incomesCol": "Доходи",
+    "expensesCol": "Витрати",
+    "netCol": "Сальдо",
+    "totalCol": "РАЗОМ",
     "modes": {
       "month": "Місяць",
-      "quarter": "Квартал",
       "year": "Рік"
-    }
+    },
+    "totalPaid": "Отримано (оплачено)",
+    "totalOwed": "Заборгованість",
+    "payerBreakdown": "Фіз.особи / Підприємства",
+    "totalPaidCol": "Всього сплачено",
+    "totalOwedCol": "Борг"
   },
   "financeCharts": {
     "title": "Динаміка та графіки",
@@ -252,7 +267,7 @@
     "chartTitle": "Динаміка надходжень",
     "loadError": "Не вдалося завантажити графіки"
   },
-    "documents": {
+  "documents": {
     "subtitle": "Документообіг організації",
     "title": "Документи",
     "upload": "Завантажити документ",
@@ -275,5 +290,54 @@
     "uploadTitle": "Завантажити документ",
     "confirmDeleteTitle": "Видалити документ?",
     "confirmDeleteText": "Ви впевнені, що хочете видалити"
+  },
+  "datePicker": {
+    "weekdays": [
+      "Пн",
+      "Вт",
+      "Ср",
+      "Чт",
+      "Пт",
+      "Сб",
+      "Нд"
+    ],
+    "placeholder": "ДД.ММ.РРРР",
+    "prevMonth": "Попередній місяць",
+    "nextMonth": "Наступний місяць",
+    "clear": "Очистити"
+  },
+  "expenses": {
+    "title": "Витрати",
+    "subtitle": "Облік витрат організації",
+    "add": "Додати витрату",
+    "addTitle": "Нова витрата",
+    "editTitle": "Редагувати витрату",
+    "titlePlaceholder": "Напр.: оренда приміщення, придбання канцтоварів",
+    "totalForPeriod": "Витрачено за період",
+    "empty": "Витрат за цей період немає",
+    "loadError": "Помилка завантаження витрат",
+    "saveError": "Помилка збереження витрати",
+    "createSuccess": "Витрату додано",
+    "updateSuccess": "Витрату оновлено",
+    "deleteSuccess": "Витрату видалено",
+    "deleteError": "Не вдалося видалити витрату",
+    "confirmDeleteTitle": "Видалити витрату?",
+    "confirmDeleteText": "Видалити витрату",
+    "fields": {
+      "date": "Дата",
+      "title": "Назва",
+      "amount": "Сума"
+    },
+    "suggestions": {
+      "rent": "Оренда приміщення",
+      "utilities": "Комунальні послуги",
+      "goods": "Придбання продукції / товарів",
+      "stationery": "Канцелярські товари",
+      "logistics": "Транспортні / логістичні витрати",
+      "bank": "Банківське обслуговування",
+      "services": "Оплата послуг підрядників",
+      "household": "Господарські витрати"
+    }
+
   }
 }
