@@ -18,7 +18,7 @@ import {
   Stack,
 } from '@mui/material';
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DatePicker } from '@/components/DatePicker';
 import dayjs from 'dayjs';
 import {useMembers} from "@/hooks";
 import {MemberFormData} from "@/types/members.ts";
@@ -177,36 +177,22 @@ console.log('PAYER TYPE:', formData.payer_type);
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                {t('members.birthDate')}
+              </Typography>
               <DatePicker
-                label={t('members.birthDate')}
-                value={formData.birth_date ? dayjs(formData.birth_date) : null}
-                onChange={(newValue) => {
-                  handleChange('birth_date', newValue ? newValue.format('YYYY-MM-DD') : null);
-                }}
-                format="DD.MM.YYYY"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    required: false,
-                  },
-                }}
+                value={formData.birth_date}
+                onChange={(value) => handleChange('birth_date', value)}
               />
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                {t('members.joinedDate')}
+              </Typography>
               <DatePicker
-                label={t('members.joinedDate')}
-                value={formData.join_date ? dayjs(formData.join_date) : null}
-                onChange={(newValue) => {
-                  handleChange('join_date', newValue ? newValue.format('YYYY-MM-DD') : '');
-                }}
-                format="DD.MM.YYYY"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    required: true,
-                  },
-                }}
+                value={formData.join_date}
+                onChange={(value) => handleChange('join_date', value ?? '')}
               />
             </Grid>
             <Grid size={{ xs: 12}}>

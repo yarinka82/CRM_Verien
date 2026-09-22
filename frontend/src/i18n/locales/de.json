@@ -8,6 +8,8 @@
   },
   "nav": {
     "home": "Übersicht",
+    "documents": "Dokumente",
+    "expenses": "Ausgaben",
     "members": "Mitgliederverzeichnis",
     "cashDesk": "Kasse & Einnahmen",
     "financeAnalytics": "Finanzanalyse & Berichte",
@@ -154,6 +156,12 @@
       "grant": "Zuschuss / Förderung",
       "other": "Sonstiges"
     },
+    "payerTypes": {
+      "individual": "Privatperson",
+      "company": "Unternehmen",
+      "other": "Sonstiges"
+    },
+
     "statuses": {
       "paid": "Bezahlt",
       "owed": "Ausstehend",
@@ -174,6 +182,7 @@
       "period": "Zeitraum",
       "amount": "Betrag",
       "status": "Status",
+      "payerType": "Zahlertyp",
       "sourceName": "Quelle",
       "comment": "Kommentar"
     },
@@ -225,26 +234,33 @@
     }
   },
   "financeOverview": {
+    "title": "Finanzübersicht",
+    "subtitle": "Finanzberichte und Gesamtanalyse",
+    "loadError": "Finanzanalyse konnte nicht geladen werden",
+    "totalIncomes": "Gesamteinnahmen",
+    "totalExpenses": "Gesamtausgaben",
+    "netBalance": "Nettoergebnis (Saldo)",
+    "otherIncome": "Sonstige Einnahmen",
+    "yearlyDynamics": "Jährliche Dynamik",
+    "dateCol": "Datum",
+    "monthCol": "Monat",
+    "incomesCol": "Einnahmen",
+    "expensesCol": "Ausgaben",
+    "netCol": "Saldo",
+    "totalCol": "GESAMT",
+    "modes": {
+      "month": "Monat",
+      "year": "Jahr"
+    },
     "totalPaid": "Erhalten (bezahlt)",
     "monthlyDynamics": "Monatliche Entwicklung",
     "payerBreakdown": "Privatpersonen / Unternehmen",
-    "loadError": "Finanzübersicht konnte nicht geladen werden",
-    "title": "Finanzanalyse & Berichte",
-    "subtitle": "Finanzberichterstattung und Aufschlüsselung",
     "today": "Aktuell",
     "yearSuffix": "Jahr",
     "empty": "Keine Transaktionen im ausgewählten Zeitraum",
-    "totalIncomes": "Gesamteinnahmen",
     "totalOwed": "Ausstehende Beträge",
-    "monthCol": "Monat",
-    "dateCol": "Datum",
     "totalPaidCol": "Bezahlt Gesamt",
-    "totalOwedCol": "Rückstand",
-    "modes": {
-      "month": "Monat",
-      "quarter": "Quartal",
-      "year": "Jahr"
-    }
+    "totalOwedCol": "Rückstand"
   },
   "financeCharts": {
   "title": "Finanzdiagramme & Trends",
@@ -277,5 +293,50 @@
     "uploadTitle": "Dokument hochladen",
     "confirmDeleteTitle": "Dokument löschen?",
     "confirmDeleteText": "Sind Sie sicher, dass Sie löschen möchten"
+  },
+  "datePicker": {
+    "weekdays": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+    "placeholder": "TT.MM.JJJJ",
+    "prevMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "clear": "Löschen"
+  },
+  "expenses": {
+    "title": "Ausgaben",
+    "subtitle": "Ausgabenverwaltung der Organisation",
+    "add": "Ausgabe hinzufügen",
+    "addTitle": "Neue Ausgabe",
+    "editTitle": "Ausgabe bearbeiten",
+    "titlePlaceholder": "Z. B.: Raummiete, Büromaterial",
+    "totalForPeriod": "Ausgaben im Zeitraum",
+    "empty": "Keine Ausgaben für diesen Zeitraum vorhanden",
+    "loadError": "Fehler beim Laden der Ausgaben",
+    "saveError": "Fehler beim Speichern der Ausgabe",
+    "createSuccess": "Ausgabe hinzugefügt",
+    "updateSuccess": "Ausgabe aktualisiert",
+    "deleteSuccess": "Ausgabe gelöscht",
+    "deleteError": "Ausgabe konnte nicht gelöscht werden",
+    "confirmDeleteTitle": "Ausgabe löschen?",
+    "confirmDeleteText": "Möchten Sie die Ausgabe wirklich löschen",
+    "fields": {
+      "date": "Datum",
+      "title": "Bezeichnung",
+      "amount": "Betrag"
+    },
+    "validation": {
+      "titleRequired": "Bitte geben Sie eine Bezeichnung für die Ausgabe an"
+    },
+    "suggestions": {
+      "rent": "Raummiete",
+      "utilities": "Nebenkosten / Betriebskosten",
+      "goods": "Wareneinkauf / Warenbeschaffung",
+      "stationery": "Bürobedarf / Schreibwaren",
+      "logistics": "Transport- / Logistikkosten",
+      "bank": "Bankgebühren / Kontoführung",
+      "services": "Dienstleistungen / Fremdleistungen",
+      "household": "Betriebsbedarf / Haushaltskosten"
+    }
+
   }
+
 }

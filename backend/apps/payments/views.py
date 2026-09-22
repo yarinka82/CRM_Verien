@@ -87,15 +87,9 @@ class PaymentViewSet(viewsets.ViewSet):
 
 
 class FinancialOverviewView(APIView):
-    """Financial Overview page: total revenue for the period,
-    breakdown by types, by type of payer (individual/subcontractor/other)
-    and by periods (months and quarters) — for dynamics graphs.
-
-    Debt (owed) cleared — each Payment record is a fact
-    completed receipt, the status is no more.
-
-    GET /api/financial-overview/?date_from=2026-01-01&date_to=2026-12-31
-    Without parameters — all the time."""
+    """Total amount of revenues for the period, breakdown by type, by payer type
+    and by months/years (without quarters — this concept is not in German
+    accounting practice)."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -111,66 +105,33 @@ class FinancialOverviewView(APIView):
 
         total = qs.aggregate(total=Sum('amount'))['total'] or 0
 
-        # --- breakdown by receipt type ---
         by_type = {
             row['type']: row['total']
             for row in qs.values('type').annotate(total=Sum('amount'))
         }
         breakdown = [
-            {
-                'type': value,
-                'type_display': str(label),
-                'total': by_type.get(value, 0),
-            }
+            {'type': value, 'type_display': str(label), 'total': by_type.get(value, 0)}
             for value, label in Payment.PaymentType.choices
         ]
 
-        # --- breakdown by payer type (individual/subcontractor/other) ---
         by_payer_type = {
             row['payer_type']: row['total']
             for row in qs.values('payer_type').annotate(total=Sum('amount'))
         }
         payer_breakdown = [
-            {
-                'payer_type': value,
-                'payer_type_display': str(label),
-                'total': by_payer_type.get(value, 0),
-            }
+            {'payer_type': value, 'payer_type_display': str(label), 'total': by_payer_type.get(value, 0)}
             for value, label in Payment.PayerType.choices
         ]
 
-        # --- breakdown by months (for the "per year" chart) ---
-        # NB: the annotation cannot be called "period" — this is the name of the Payment model field.
         by_month_qs = (
-            qs
-            .annotate(month=TruncMonth('date'))
+            qs.annotate(month=TruncMonth('date'))
             .values('month')
             .annotate(total=Sum('amount'))
             .order_by('month')
         )
         by_period = [
-            {
-                'period': row['month'].strftime('%Y-%m') if row['month'] else None,
-                'total': row['total'],
-            }
+            {'period': row['month'].strftime('%Y-%m') if row['month'] else None, 'total': row['total']}
             for row in by_month_qs
-        ]
-
-        # --- breakdown by quarters (for the chart "by quarters") ---
-        by_quarter_qs = (
-            qs
-            .annotate(quarter=TruncQuarter('date'))
-            .values('quarter')
-            .annotate(total=Sum('amount'))
-            .order_by('quarter')
-        )
-        by_period_quarterly = [
-            {
-                # TruncQuarter returns the first day of the quarter — we count the quarter number from the month
-                'period': f"{row['quarter'].year}-Q{(row['quarter'].month - 1) // 3 + 1}" if row['quarter'] else None,
-                'total': row['total'],
-            }
-            for row in by_quarter_qs
         ]
 
         return Response({
@@ -180,5 +141,4 @@ class FinancialOverviewView(APIView):
             'breakdown': breakdown,
             'payer_breakdown': payer_breakdown,
             'by_period': by_period,
-            'by_period_quarterly': by_period_quarterly,
         })
