@@ -67,7 +67,7 @@ class ExpenseViewSet(viewsets.ViewSet):
 
 
 class ExpenseOverviewView(APIView):
-    """Загальна сума витрат за період + динаміка по місяцях."""
+    """Total amount of expenses for the period + dynamics by months."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

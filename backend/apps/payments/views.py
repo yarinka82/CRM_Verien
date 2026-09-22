@@ -87,11 +87,9 @@ class PaymentViewSet(viewsets.ViewSet):
 
 
 class FinancialOverviewView(APIView):
-    """
-    Загальна сума надходжень за період, розбивка по типах, по типу платника
-    та по місяцях/роках (без кварталів — цього поняття немає в німецькій
-    практиці обліку).
-    """
+    """Total amount of revenues for the period, breakdown by type, by payer type
+    and by months/years (without quarters — this concept is not in German
+    accounting practice)."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

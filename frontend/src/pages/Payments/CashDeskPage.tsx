@@ -33,7 +33,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -46,7 +46,7 @@ import {
   TrendingUp as TrendingUpIcon,
   Groups as GroupsIcon,
 } from '@mui/icons-material';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 import { paymentsApi } from '@/api/payments';
 import { apiFetch } from '@/api/client';
@@ -59,6 +59,7 @@ import {
   PAYMENT_TYPE_LABELS,
   PAYER_TYPE_LABELS,
 } from '@/types/payments';
+import { DateField } from "./DateField";
 
 interface MemberShort {
   id: number;
@@ -133,26 +134,62 @@ export const CashDeskPage: React.FC = () => {
     }
   };
 
+  // 1. Create a quick dictionary of members of the organization for instant search by ID
+  const membersMap = useMemo(() => {
+    return new Map(members.map((m) => [m.id, m]));
+  }, [members]);
+
+  // 2. Smart and safe filtration
   const filteredPayments = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+
     return payments
       .filter((p) => (typeFilter === 'all' ? true : p.type === typeFilter))
       .filter((p) => (payerTypeFilter === 'all' ? true : p.payer_type === payerTypeFilter))
       .filter((p) => {
-        if (!searchQuery.trim()) return true;
-        const q = searchQuery.toLowerCase();
+        if (!q) return true;
+
+        // Name of the member of the organization (from the object or through the dictionary by ID)
+        const memberObj = p.member ? membersMap.get(p.member) : null;
+        const memberFullName = memberObj
+          ? `${memberObj.last_name} ${memberObj.first_name} ${memberObj.email}`.toLowerCase()
+          : (p.member_name || '').toLowerCase();
+
+        // Source / Fund
+        const source = (p.source_name || '').toLowerCase();
+
+        // Period & Comment
+        const period = String(p.period || '').toLowerCase();
+        const comment = (p.comment || '').toLowerCase();
+
+        // Amount (safe line break)
+        const amountStr = String(p.amount ?? '');
+
+        // Dates (ISO and DD.MM.YYYY)
+        const dateRaw = String(p.date || '');
+        const dateFormatted = dayjs(p.date).format('DD.MM.YYYY');
+
+        // Translated names of payment types and payer
+        const typeTranslated = t(`payments.types.${p.type}`, p.type || '').toLowerCase();
+        const payerTypeTranslated = t(`payments.payerTypes.${p.payer_type}`, p.payer_type || '').toLowerCase();
+
         return (
-          (p.member_name && p.member_name.toLowerCase().includes(q)) ||
-          (p.source_name && p.source_name.toLowerCase().includes(q)) ||
-          (p.period && p.period.toLowerCase().includes(q)) ||
-          (p.comment && p.comment.toLowerCase().includes(q)) ||
-          p.amount.includes(q)
+          memberFullName.includes(q) ||
+          source.includes(q) ||
+          period.includes(q) ||
+          comment.includes(q) ||
+          amountStr.includes(q) ||
+          dateRaw.includes(q) ||
+          dateFormatted.includes(q) ||
+          typeTranslated.includes(q) ||
+          payerTypeTranslated.includes(q)
         );
       })
       .sort((a, b) => {
         const diff = dayjs(a.date).valueOf() - dayjs(b.date).valueOf();
         return sortOrder === 'asc' ? diff : -diff;
       });
-  }, [payments, typeFilter, payerTypeFilter, searchQuery, sortOrder]);
+  }, [payments, membersMap, typeFilter, payerTypeFilter, searchQuery, sortOrder, t]);
 
   const stats = useMemo(() => {
     const total = payments.reduce((sum, p) => sum + Number(p.amount), 0);
@@ -622,17 +659,23 @@ export const CashDeskPage: React.FC = () => {
                         color={p.type === 'membership_fee' ? 'primary' : 'default'}
                       />
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>
-                      {p.member_name ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <span>{p.member_name}</span>
-                        </Box>
-                      ) : (
-                        <Box sx={{ fontStyle: p.source_name ? 'normal' : 'italic', color: p.source_name ? 'text.primary' : 'text.disabled' }}>
-                          {p.source_name || '—'}
-                        </Box>
-                      )}
-                    </TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>
+                        {p.member ? (
+                          (() => {
+                            const m = membersMap.get(p.member);
+                            return (
+                              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                <span>{m ? `${m.last_name} ${m.first_name}` : p.member_name || `ID #${p.member}`}</span>
+                                {m?.email && <Typography variant="caption" color="text.secondary">{m.email}</Typography>}
+                              </Box>
+                            );
+                          })()
+                        ) : (
+                          <Box sx={{ fontStyle: p.source_name ? 'normal' : 'italic', color: p.source_name ? 'text.primary' : 'text.disabled' }}>
+                            {p.source_name || '—'}
+                          </Box>
+                        )}
+                      </TableCell>
                     <TableCell>
                       <Chip
                         label={t(`payments.payerTypes.${p.payer_type}`, p.payer_type_display || '')}
@@ -645,22 +688,24 @@ export const CashDeskPage: React.FC = () => {
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
                       {Number(p.amount).toFixed(2)} €
                     </TableCell>
-                    <TableCell align="right">
-                      <Tooltip title={t('common.edit', 'Редагувати')}>
-                        <IconButton size="small" onClick={() => handleOpenEdit(p)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('common.delete', 'Видалити')}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => setDeleteTarget(p)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
+                     <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                       <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+                         <Tooltip title={t('common.edit', 'Редагувати')}>
+                           <IconButton size="small" onClick={() => handleOpenEdit(p)}>
+                             <EditIcon fontSize="small" />
+                           </IconButton>
+                         </Tooltip>
+                         <Tooltip title={t('common.delete', 'Видалити')}>
+                           <IconButton
+                             size="small"
+                             color="error"
+                             onClick={() => setDeleteTarget(p)}
+                           >
+                             <DeleteIcon fontSize="small" />
+                           </IconButton>
+                         </Tooltip>
+                       </Stack>
+                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -760,6 +805,7 @@ export const CashDeskPage: React.FC = () => {
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
+                  sx={{ flex: 1 }}
                 label={t('payments.fields.amount', 'Сума *')}
                 type="number"
                 value={form.amount}
@@ -772,15 +818,14 @@ export const CashDeskPage: React.FC = () => {
                 fullWidth
               />
 
-              <DatePicker
-                label={t('payments.fields.date', 'Дата *')}
-                format="DD.MM.YYYY"
-                value={dayjs(form.date)}
-                onChange={(value: Dayjs | null) =>
-                  setForm({ ...form, date: value ? value.format('YYYY-MM-DD') : form.date })
-                }
-                slotProps={{ textField: { fullWidth: true } }}
-              />
+             <Box sx={{ flex: 1, minWidth: 0 }}>
+
+               <DateField
+                 label={t('payments.fields.date', 'Дата *')}
+                 value={form.date}
+                 onChange={(value) => setForm({ ...form, date: value ?? form.date })}
+               />
+             </Box>
             </Stack>
 
             <TextField

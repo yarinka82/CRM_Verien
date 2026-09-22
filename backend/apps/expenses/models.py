@@ -4,12 +4,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Expense(models.Model):
-    """
-    Витрати організації — на що витрачали кошти.
-    Навмисно мінімальна модель: назва, сума, дата.
-    Категорію не фіксуємо, бо витрати "дуже різні" (оренда, придбання
-    продукції тощо) — просто вільний текст у title.
-    """
+    """Expenses of the organization — what the funds were spent on.
+    Intentionally minimal model: name, amount, date.
+    We do not fix the category, because the costs are "very different" (rent, purchase
+    products, etc.) — just free text in the title."""
 
     title = models.CharField(
         max_length=255,

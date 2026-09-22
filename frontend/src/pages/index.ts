@@ -8,3 +8,4 @@ export { default as Settings } from './Settings/Preferences';
 export { default as FinanceOverview } from './Payments/FinanceOverview';
 export { default as CashDeskPage } from './Payments/CashDeskPage';
 export { default as DocumentsPage } from './Documents/DocumentsPage';
+export { default as ExpensesPage } from './Expenses/ExpensesPage';

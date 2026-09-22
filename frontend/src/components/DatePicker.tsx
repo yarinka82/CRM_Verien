@@ -46,6 +46,7 @@ export function DatePicker({ value, onChange, placeholder }: DatePickerProps) {
 
   const locale = LOCALE_MAP[i18n.resolvedLanguage ?? "uk"] ?? "uk-UA";
 
+
   const WEEKDAY_LABELS = t("datePicker.weekdays", {
     returnObjects: true,
     defaultValue: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"],
@@ -57,6 +58,8 @@ export function DatePicker({ value, onChange, placeholder }: DatePickerProps) {
 
   const [viewYear, setViewYear] = useState(initialYear);
   const [viewMonth, setViewMonth] = useState(initialMonth);
+
+
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -111,10 +114,9 @@ export function DatePicker({ value, onChange, placeholder }: DatePickerProps) {
     ...Array.from({ length: totalDays }, (_, i) => i + 1),
   ];
 
-  const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString(locale, {
-    month: "long",
-    year: "numeric",
-  });
+  const currentActualYear = new Date().getFullYear();
+  // Sufficient range for date of birth (100 years ago) + slightly forward
+  const yearOptions = Array.from({ length: 111 }, (_, i) => currentActualYear + 10 - i);
 
   return (
     <div className="datepicker" ref={containerRef}>
@@ -137,7 +139,23 @@ export function DatePicker({ value, onChange, placeholder }: DatePickerProps) {
             >
               ‹
             </button>
-            <span className="datepicker-month-label">{monthLabel}</span>
+            <div className="datepicker-month-year">
+              <span className="datepicker-month-label">
+                {new Date(viewYear, viewMonth, 1).toLocaleDateString(locale, { month: "long" })}
+              </span>
+              <select
+                className="datepicker-year-select"
+                value={viewYear}
+                onChange={(e) => setViewYear(Number(e.target.value))}
+                aria-label={t("datePicker.selectYear", "Обрати рік")}
+              >
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+
+
             <button
               type="button"
               className="datepicker-nav"

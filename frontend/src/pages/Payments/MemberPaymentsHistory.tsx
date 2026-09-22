@@ -27,13 +27,13 @@ import {
   Stack,
   InputAdornment,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DatePicker } from '@/components/DatePicker';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { paymentsApi } from '@/api/payments';
 import {
   Payment,
@@ -282,15 +282,15 @@ const MemberPaymentsHistory = ({ memberId }: MemberPaymentsHistoryProps) => {
               autoFocus
             />
 
-            <DatePicker
-              label={t('payments.fields.date', 'Дата')}
-              format="DD MM YYYY"
-              value={dayjs(form.date)}
-              onChange={(value: Dayjs | null) =>
-                setForm({ ...form, date: value ? value.format('YYYY-MM-DD') : form.date })
-              }
-              slotProps={{ textField: { fullWidth: true } }}
-            />
+            <div>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                {t('payments.fields.date', 'Дата')}
+              </Typography>
+              <DatePicker
+                value={form.date}
+                onChange={(value) => setForm({ ...form, date: value ?? form.date })}
+              />
+            </div>
 
             <TextField
               label={t('payments.fields.period', 'Період')}
