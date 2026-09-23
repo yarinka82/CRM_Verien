@@ -24,9 +24,6 @@ import {
   Alert,
   Stack,
   InputAdornment,
-  ToggleButton,
-  ToggleButtonGroup,
-  Grid,
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@/components/DatePicker';
@@ -34,14 +31,14 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
   TrendingDown as TrendingDownIcon,
 } from '@mui/icons-material';
 
 import { expensesApi } from '@/api/expenses';
 import { toast } from '@/components/Notifier';
 import type { Expense, ExpenseFormData } from '@/types/expenses';
+import { PageHeader } from '@/components/PageHeader';
+import { PeriodToolbar } from '@/components/PeriodToolbar';
 
 type PeriodMode = 'month' | 'year';
 
@@ -225,51 +222,26 @@ const ExpensesPage: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', px: { xs: 2, md: 4 }, py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: '0.1em' }}>
-            {t('expenses.subtitle', 'Облік витрат організації')}
-          </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 800 }}>
-            {t('expenses.title', 'Витрати')}
-          </Typography>
-        </Box>
+      <PageHeader
+        overline={t('expenses.subtitle', 'Облік витрат організації')}
+        title={t('expenses.title', 'Витрати')}
+        periodMode={periodMode}
+        onPeriodModeChange={setPeriodMode}
+        monthLabel={t('financeOverview.modes.month', 'Місяць')}
+        yearLabel={t('financeOverview.modes.year', 'Рік')}
+      />
 
-        <ToggleButtonGroup
-          value={periodMode}
-          exclusive
-          size="small"
-          onChange={(_, val) => val && setPeriodMode(val)}
-        >
-          <ToggleButton value="month" sx={{ px: 2.5, fontWeight: 600 }}>{t('financeOverview.modes.month', 'Місяць')}</ToggleButton>
-          <ToggleButton value="year" sx={{ px: 2.5, fontWeight: 600 }}>{t('financeOverview.modes.year', 'Рік')}</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-
-      <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <IconButton onClick={handlePrev}><ChevronLeftIcon /></IconButton>
-              <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, textTransform: 'capitalize' }}>{periodLabel}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {dayjs(dateFrom).format('DD.MM.YYYY')} — {dayjs(dateTo).format('DD.MM.YYYY')}
-                </Typography>
-              </Box>
-              <IconButton onClick={handleNext}><ChevronRightIcon /></IconButton>
-              <Button size="small" onClick={handleToday} sx={{ ml: 1, textTransform: 'none' }}>
-                {t('financeOverview.today', 'Поточний')}
-              </Button>
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Button variant="contained" fullWidth startIcon={<AddIcon />} onClick={openCreateDialog} sx={{ height: 44 }}>
-              {t('expenses.add', 'Додати витрату')}
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+      <PeriodToolbar
+        periodLabel={periodLabel}
+        dateFromLabel={dayjs(dateFrom).format('DD.MM.YYYY')}
+        dateToLabel={dayjs(dateTo).format('DD.MM.YYYY')}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onToday={handleToday}
+        actionLabel={t('expenses.add', 'Додати витрату')}
+        actionIcon={<AddIcon />}
+        onAction={openCreateDialog}
+      />
 
       <Paper sx={{ p: 2.5, mb: 3, borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2, maxWidth: 320 }}>
         <TrendingDownIcon sx={{ fontSize: 36, color: 'error.main' }} />
