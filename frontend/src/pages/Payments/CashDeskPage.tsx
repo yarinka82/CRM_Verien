@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
+import dayjs, { Dayjs } from 'dayjs';
 import {
   Box,
   Paper,
@@ -47,7 +48,6 @@ import {
   TrendingUp as TrendingUpIcon,
   Groups as GroupsIcon,
 } from '@mui/icons-material';
-import dayjs from 'dayjs';
 
 import { paymentsApi } from '@/api/payments';
 import { apiFetch } from '@/api/client';
@@ -61,6 +61,10 @@ import {
   PAYER_TYPE_LABELS,
 } from '@/types/payments';
 import { DateField } from "./DateField";
+import {PageHeader} from "@/components/PageHeader.tsx";
+import {PeriodToolbar} from "@/components/PeriodToolbar.tsx";
+
+type PeriodMode = 'month' | 'year';
 
 interface MemberShort {
   id: number;
@@ -86,16 +90,25 @@ const emptyUniversalForm = (): CashDeskFormData => ({
 });
 
 export const CashDeskPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
+
+  // ── Период (аналогично ExpensesPage) ──
+  const modeParam = searchParams.get('mode');
+  const dateParam = searchParams.get('date');
+  const [periodMode, setPeriodMode] = useState<PeriodMode>(
+    modeParam === 'year' || modeParam === 'month' ? modeParam : 'month'
+  );
+  const [currentDate, setCurrentDate] = useState<Dayjs>(
+    dateParam && dayjs(dateParam).isValid() ? dayjs(dateParam) : dayjs()
+  );
 
   const [payments, setPayments] = useState<Payment[]>([]);
   const [members, setMembers] = useState<MemberShort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -113,21 +126,43 @@ export const CashDeskPage: React.FC = () => {
 
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
 
+  const locale = i18n.language === 'de' ? 'de-DE' : i18n.language === 'en' ? 'en-US' : 'uk-UA';
+
+  const { dateFrom, dateTo, periodLabel } = useMemo(() => {
+    const from = periodMode === 'month' ? currentDate.startOf('month') : currentDate.startOf('year');
+    const to = periodMode === 'month' ? currentDate.endOf('month') : currentDate.endOf('year');
+
+    const month = currentDate.toDate().toLocaleDateString(locale, { month: 'long' });
+    const year = currentDate.format('YYYY');
+    const label = periodMode === 'month'
+      ? `${month} ${year}`
+      : `${year} ${t('financeOverview.yearSuffix', 'рік')}`;
+
+    return {
+      dateFrom: from.format('YYYY-MM-DD'),
+      dateTo: to.format('YYYY-MM-DD'),
+      periodLabel: label,
+    };
+  }, [periodMode, currentDate, t, locale]);
+
   useEffect(() => {
     loadInitialData();
-  }, []);
+  }, [dateFrom, dateTo]);
 
   const loadInitialData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const paymentsData = await paymentsApi.getPayments();
+      const paymentsData = await paymentsApi.getPayments({ date_from: dateFrom, date_to: dateTo });
       setPayments(paymentsData);
 
-      const res = await apiFetch('/api/members/');
-      if (res.ok) {
-        const membersData = await res.json();
-        setMembers(membersData);
+      // Members list doesn't depend on period — load once
+      if (members.length === 0) {
+        const res = await apiFetch('/api/members/');
+        if (res.ok) {
+          const membersData = await res.json();
+          setMembers(membersData);
+        }
       }
     } catch (err) {
       console.error('Error loading cash desk data:', err);
@@ -138,6 +173,10 @@ export const CashDeskPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handlePrev = () => setCurrentDate((p) => p.subtract(1, periodMode));
+  const handleNext = () => setCurrentDate((p) => p.add(1, periodMode));
+  const handleToday = () => setCurrentDate(dayjs());
 
   // 1. Create a quick dictionary of members of the organization for instant search by ID
   const membersMap = useMemo(() => {
@@ -436,81 +475,49 @@ export const CashDeskPage: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: 4 }}>
-      {/* 1. Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 3.5,
-          flexWrap: 'wrap',
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<AddIcon sx={{ fontSize: '1.6rem !important' }} />}
-            onClick={handleOpenCreate}
-            sx={{
-              py: 1.5,
-              px: 3.5,
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              borderRadius: 2.5,
-              boxShadow: 3,
-              textTransform: 'none',
-              letterSpacing: '0.02em',
-              bgcolor: 'primary.main',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-                boxShadow: 5,
-              },
-            }}
-          >
-            {t('cashDesk.addIncome', '+ Додати надходження')}
-          </Button>
+      <PageHeader
+        overline={t('cashDesk.subtitle', 'Фінансовий облік')}
+        title={t('cashDesk.title', 'Каса та журнал надходжень')}
+        periodMode={periodMode}
+        onPeriodModeChange={setPeriodMode}
+        monthLabel={t('financeOverview.modes.month', 'Місяць')}
+        yearLabel={t('financeOverview.modes.year', 'Рік')}
+      />
 
-          <Box sx={{ ml: { xs: 0, md: 4 } }}>
-            <Typography
-              variant="overline"
-              sx={{ color: 'text.secondary', letterSpacing: '0.1em', display: 'block', lineHeight: 1.2 }}
-            >
-              {t('cashDesk.subtitle', 'Фінансовий облік')}
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1.1 }}>
-              {t('cashDesk.title', 'Каса та журнал надходжень')}
-            </Typography>
-          </Box>
-        </Box>
+      <PeriodToolbar
+        periodLabel={periodLabel}
+        dateFromLabel={dayjs(dateFrom).format('DD.MM.YYYY')}
+        dateToLabel={dayjs(dateTo).format('DD.MM.YYYY')}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onToday={handleToday}
+        actionLabel={t('cashDesk.addIncome', '+ Додати надходження')}
+        actionIcon={<AddIcon />}
+        onAction={handleOpenCreate}
+        actionLoading={loading}
+      />
 
-        <Box>
-          <Button
-            variant="outlined"
-            startIcon={<FileDownloadIcon />}
-            onClick={(e) => setExportAnchorEl(e.currentTarget)}
-            disabled={filteredPayments.length === 0}
-            sx={{ borderRadius: 2, px: 2, py: 1 }}
-          >
-            {t('common.export', 'Експорт')}
-          </Button>
-
-          <Menu
-            anchorEl={exportAnchorEl}
-            open={Boolean(exportAnchorEl)}
-            onClose={() => setExportAnchorEl(null)}
-          >
-            <MenuItem onClick={exportCSV}>
-              <ListItemIcon><TableViewIcon fontSize="small" /></ListItemIcon>
-              <ListItemText>{t('common.exportCSV', 'Експорт у CSV (Excel)')}</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={exportPDF}>
-              <ListItemIcon><PictureAsPdfIcon fontSize="small" /></ListItemIcon>
-              <ListItemText>{t('common.exportPDF', 'Експорт у PDF')}</ListItemText>
-            </MenuItem>
-          </Menu>
-        </Box>
+      {/* Export — второстепенное действие, отдельно над фильтрами */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="outlined"
+          startIcon={<FileDownloadIcon />}
+          onClick={(e) => setExportAnchorEl(e.currentTarget)}
+          disabled={filteredPayments.length === 0}
+          sx={{ borderRadius: 2, px: 2, py: 1 }}
+        >
+          {t('common.export', 'Експорт')}
+        </Button>
+        <Menu anchorEl={exportAnchorEl} open={Boolean(exportAnchorEl)} onClose={() => setExportAnchorEl(null)}>
+          <MenuItem onClick={exportCSV}>
+            <ListItemIcon><TableViewIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{t('common.exportCSV', 'Експорт у CSV (Excel)')}</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={exportPDF}>
+            <ListItemIcon><PictureAsPdfIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{t('common.exportPDF', 'Експорт у PDF')}</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
 
       {/* 2. KPI Cards */}
