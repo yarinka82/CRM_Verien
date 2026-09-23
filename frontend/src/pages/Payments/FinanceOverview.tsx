@@ -13,13 +13,7 @@ import {
   TableRow,
   TableCell,
   TableContainer,
-  Button,
-  IconButton,
-  CircularProgress,
-  Alert,
-  ToggleButton,
-  ToggleButtonGroup,
-  Grid,
+  Grid, ToggleButtonGroup, ToggleButton, Alert, CircularProgress,
 } from '@mui/material';
 import {
   LineChart,
@@ -32,8 +26,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
@@ -44,6 +36,8 @@ import { paymentsApi } from '@/api/payments';
 import { expensesApi } from '@/api/expenses';
 import type { Payment } from '@/types/payments';
 import type { Expense } from '@/types/expenses';
+import { PageHeader } from '@/components/PageHeader';
+import { PeriodToolbar } from '@/components/PeriodToolbar';
 
 type PeriodMode = 'month' | 'year';
 type ChartMode = 'month' | 'year';
@@ -273,92 +267,45 @@ export const FinanceOverviewPage: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: 4 }}>
-      {/* 1. Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: '0.1em' }}>
-            {t('financeOverview.subtitle', 'Фінансова звітність та аналіз')}
-          </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 800 }}>
-            {t('financeOverview.title', 'Фінансовий огляд')}
-          </Typography>
-        </Box>
+      <PageHeader
+        overline={t('financeOverview.subtitle', 'Фінансова звітність та аналіз')}
+        title={t('financeOverview.title', 'Фінансовий огляд')}
+        periodMode={periodMode}
+        onPeriodModeChange={setPeriodMode}
+        monthLabel={t('financeOverview.modes.month', 'Місяць')}
+        yearLabel={t('financeOverview.modes.year', 'Рік')}
+      />
 
-        <ToggleButtonGroup
-          value={periodMode}
-          exclusive
-          size="small"
-          onChange={(_, val) => val && setPeriodMode(val)}
-          sx={{ bgcolor: 'background.paper' }}
-        >
-          <ToggleButton value="month" sx={{ px: 2.5, fontWeight: 600 }}>
-            {t('financeOverview.modes.month', 'Місяць')}
-          </ToggleButton>
-          <ToggleButton value="year" sx={{ px: 2.5, fontWeight: 600 }}>
-            {t('financeOverview.modes.year', 'Рік')}
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-
-      {/*2. Period Navigator*/}
-      <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <IconButton onClick={handlePrev} size="large" sx={{ bgcolor: 'action.hover' }}>
-                <ChevronLeftIcon />
-              </IconButton>
-
-              <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  {periodLabel}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {dayjs(dateFrom).format('DD.MM.YYYY')} — {dayjs(dateTo).format('DD.MM.YYYY')}
-                </Typography>
-              </Box>
-
-              <IconButton onClick={handleNext} size="large" sx={{ bgcolor: 'action.hover' }}>
-                <ChevronRightIcon />
-              </IconButton>
-
-              <Button size="small" variant="text" onClick={handleResetToCurrent} sx={{ ml: 1, textTransform: 'none' }}>
-                {t('financeOverview.today', 'Поточний')}
-              </Button>
-            </Box>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <RefreshIcon />}
-              onClick={fetchOverviewData}
-              disabled={loading}
-              sx={{ height: 44, borderRadius: 2 }}
-            >
-              {t('common.refresh', 'Оновити дані')}
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+      <PeriodToolbar
+        periodLabel={periodLabel}
+        dateFromLabel={dayjs(dateFrom).format('DD.MM.YYYY')}
+        dateToLabel={dayjs(dateTo).format('DD.MM.YYYY')}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onToday={handleResetToCurrent}
+        actionLabel={t('common.refresh', 'Оновити дані')}
+        actionIcon={<RefreshIcon />}
+        onAction={fetchOverviewData}
+        actionLoading={loading}
+      />
 
       {/*3. Consolidated KPI Cards (Income, Expenses, Balance)*/}
       <Grid container spacing={2} sx={{ mb: 3 }}>
 
         {/*🟢 CARD 1: EARNINGS -> transition to /cashdesk*/}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Paper
-            onClick={() => {
-              // Если выбран год — передаем "2026", если месяц — "MM.YYYY" (например, "08.2026")
-              const searchParam =
-                periodMode === 'year'
-                  ? currentDate.format('YYYY')
-                  : currentDate.format('MM.YYYY');
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Paper
+          onClick={() => {
+            const searchParam =
+              periodMode === 'year'
+                ? currentDate.format('YYYY')
+                : currentDate.format('MM.YYYY');
 
-              navigate(`/cashdesk?search=${searchParam}`);
-            }}
-            sx={{
+            navigate(
+              `/cashdesk?search=${searchParam}&mode=${periodMode}&date=${currentDate.format('YYYY-MM-DD')}`
+            );
+          }}
+          sx={{
               p: 2,
               borderRadius: 2,
               display: 'flex',
