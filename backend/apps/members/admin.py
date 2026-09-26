@@ -2,6 +2,7 @@
 from django.contrib import admin
 from django.utils.translation import ngettext
 from .models import Member
+from apps.users.models import RequestLog
 
 try:
     from apps.payments.models import Payment
@@ -22,6 +23,17 @@ if HAS_PAYMENTS:
         show_change_link = True
 
 
+@admin.register(RequestLog)
+class RequestLogAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'ip_address', 'user', 'method', 'path', 'status_code')
+    list_filter = ('method', 'status_code', 'created_at')
+    search_fields = ('ip_address', 'path', 'user__username')
+    readonly_fields = [f.name for f in RequestLog._meta.fields]
+
+    def has_add_permission(self, request):
+        return False  # Запретить добавлять логи вручную через админку
+
+
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
     list_display = (
@@ -34,8 +46,7 @@ class MemberAdmin(admin.ModelAdmin):
     # Toggle status/founder flag directly from the list, no need to open each record
     list_editable = ('status', 'is_founder')
 
-    # Quick year/month/day drill-down above the list — handy once you have
-    # more than a couple dozen members
+    # Quick year/month/day drill-down above the list
     date_hierarchy = 'join_date'
 
     list_per_page = 50
@@ -50,7 +61,7 @@ class MemberAdmin(admin.ModelAdmin):
         }),
         ('Примітки', {
             'fields': ('notes',),
-            'classes': ('collapse',),  # collapsed by default, rarely needed at a glance
+            'classes': ('collapse',),
         }),
     )
 
@@ -92,14 +103,15 @@ class MemberAdmin(admin.ModelAdmin):
     def unmark_founder(self, request, queryset):
         updated = queryset.update(is_founder=False)
         self.message_user(request, f'Позначку знято у {updated} члена(ів).')
-    
-    if HAS_PAYMENTS:
-        @admin.register(Payment)
-        class PaymentAdmin(admin.ModelAdmin):
-            list_display = ('id', 'member', 'type', 'payer_type', 'amount', 'date', 'source_name')
-            list_filter = ('type', 'payer_type', 'date')
-            search_fields = ('member__first_name', 'member__last_name', 'source_name', 'comment')
-            date_hierarchy = 'date'
-            ordering = ('-date',)
-            autocomplete_fields = ('member',)
-            list_per_page = 50
+
+
+if HAS_PAYMENTS:
+    @admin.register(Payment)
+    class PaymentAdmin(admin.ModelAdmin):
+        list_display = ('id', 'member', 'type', 'payer_type', 'amount', 'date', 'source_name')
+        list_filter = ('type', 'payer_type', 'date')
+        search_fields = ('member__first_name', 'member__last_name', 'source_name', 'comment')
+        date_hierarchy = 'date'
+        ordering = ('-date',)
+        autocomplete_fields = ('member',)
+        list_per_page = 50
